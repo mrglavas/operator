@@ -1,0 +1,157 @@
+###############################################################################
+# Copyright (c) 2019 IBM Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
+
+###############################################################################
+## Common image variables
+###############################################################################
+
+
+###############################################################################
+## kAppNav REST API variables
+###############################################################################
+
+appNavApi:
+  repository: kappnav/kappnav-api
+  tag: 1.0.1
+  resources:
+    constraints:
+      enabled: false
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+###############################################################################
+## kAppNav Controller variables
+###############################################################################
+
+appNavController:
+  repository: kappnav/kappnav-controller
+  tag: 1.0.1
+  resources:
+    constraints:
+      enabled: false
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+###############################################################################
+## kAppNav UI variables
+###############################################################################
+
+appNavUI:
+  repository: kappnav/kappnav-ui
+  tag: 1.0.1
+  service:
+    type: ClusterIP
+  resources:
+    constraints:
+      enabled: false
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+###############################################################################
+## kAppNav WAS Controller variables
+###############################################################################
+
+appNavWASController:
+  repository: kappnav/kappnav-was-controller
+  tag: 1.0.1
+  resources:
+    constraints:
+      enabled: false
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+###############################################################################
+## kAppNav Init Container variables
+###############################################################################
+
+appNavInit:
+  repository: kappnav/kappnav-init
+  tag: 1.0.1
+  resources:
+    constraints:
+      enabled: false
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+###############################################################################
+## kAppNav Cmds Container variables
+###############################################################################
+
+appNavCmds:
+  repository: kappnav/kappnav-cmds
+  tag: 1.0.1
+  resources:
+    constraints:
+      enabled: false
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+image:
+  pullPolicy: Always
+  pullSecrets: []
+
+###############################################################################
+## Environmental variables
+###############################################################################
+env:
+  kubeEnv: okd
+
+###############################################################################
+## Architecture
+###############################################################################
+# Specify architecture (amd64, ppc64le, s390x) and weight to be
+# used for scheduling as follows :
+#   0 - Do not use
+#   1 - Least preferred
+#   2 - No preference
+#   3 - Most preferred
+arch:
+  amd64: "2 - No preference"
+  ppc64le: "2 - No preference"
+  s390x: "2 - No preference"
+
+###############################################################################
+## OpenShift web console variables 
+###############################################################################
+
+console:
+    okdFeaturedApp: disabled 
+    okdAppLauncher: disabled 
+

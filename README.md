@@ -12,5 +12,5 @@ cd <kappnav project root>/helm-operator
 To uninstall Application navigator issue the following command:
 
 ```shell
-kubectl apply -f kappnav-delete.yaml 
+kubectl delete -f kappnav.yaml 
 ```

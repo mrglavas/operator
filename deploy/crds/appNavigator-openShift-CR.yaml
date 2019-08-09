@@ -31,8 +31,8 @@ spec:
   ###############################################################################
   
   appNavApi:
-    repository: kappnav/kappnav-apis
-    tag: latest
+    repository: kappnav/apis
+    tag: 1.0.0
     resources:
       constraints:
         enabled: false
@@ -48,8 +48,8 @@ spec:
   ###############################################################################
   
   appNavController:
-    repository: kappnav/kappnav-controller
-    tag: latest
+    repository: kappnav/controller
+    tag: 1.0.0
     resources:
       constraints:
         enabled: false
@@ -65,8 +65,8 @@ spec:
   ###############################################################################
   
   appNavUI:   
-    repository: kappnav/kappnav-ui
-    tag: latest
+    repository: kappnav/ui
+    tag: 1.0.0
     service:
       type: ClusterIP
     resources:
@@ -79,47 +79,14 @@ spec:
         cpu: 500m
         memory: 512Mi
   
-  ###############################################################################
-  ## kAppNav WAS Controller variables 
-  ###############################################################################
-  
-  appNavWASController:
-    repository: kappnav/kappnav-was-controller
-    tag: latest
-    resources:
-      constraints:
-        enabled: false
-      requests:
-        cpu: 500m
-        memory: 512Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
   
   ###############################################################################
   ## kAppNav Init Container variables 
   ###############################################################################
   
   appNavInit:
-    repository: kappnav/kappnav-init
-    tag: latest
-    resources: 
-      constraints:
-        enabled: false
-      requests:
-        cpu: 500m
-        memory: 512Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
-  
-  ###############################################################################
-  ## kAppNav Cmds Container variables 
-  ###############################################################################
-  
-  appNavCmds:
-    repository: kappnav/kappnav-cmds
-    tag: latest
+    repository: kappnav/init
+    tag: 1.0.0
     resources: 
       constraints:
         enabled: false

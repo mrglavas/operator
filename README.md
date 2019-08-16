@@ -4,13 +4,9 @@ Used to install Application Navigator using helm chart. The operator is to read 
 
 ## Build
 
-cd <kappnav project root>/helm-operator 
+cd <kappnav project root>/operator 
 ./build.sh
   
-## Uninstall
+## Install and Uninstall
 
-To uninstall Application navigator issue the following command:
-
-```shell
-kubectl delete -f kappnav.yaml 
-```
+See [README](https://github.com/kappnav/README#install)

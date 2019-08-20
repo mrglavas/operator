@@ -211,4 +211,10 @@ spec:
     amd64: "2 - No preference"
     ppc64le: "2 - No preference"
     s390x: "2 - No preference"
-  
+
+   ###############################################################################
+  ## OpenShift web console variables
+  ###############################################################################
+  console:
+    okdFeaturedApp: enabled
+    okdAppLauncher: enabled 

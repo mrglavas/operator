@@ -21,6 +21,20 @@ metadata:
 data:
   url-actions: |
     [
+{{ if or (eq .Values.env.kubeEnv "minishift") (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
+      { 
+        "name":"replicas", 
+        "text":"View Replicas", 
+        "text.nls":"action.url.deployment.replicas.text", 
+        "description":"View Deploysment replicas", 
+        "description.nls":"action.url.deployment.replicas.desc", 
+        # do not use / before project otherwise it will have // as openshift console url end with / already
+        "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/deployment/${resource.$.metadata.name}", 
+        "open-window": "current", 
+        "menu-item": "false" 
+      }
+{{ end }}
+{{ if ne .Values.env.kubeEnv "minishift" }}
       { 
         "name":"detail", 
         "text":"View Detail", 
@@ -28,11 +42,13 @@ data:
         "description":"View Deployment detail", 
         "description.nls":"action.url.deployment.detail.desc", 
 {{ if eq .Values.env.kubeEnv "minikube" }}
-        "url-pattern":"${builtin.icp-console-url}/deployment/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
-{{ else }}
-        "url-pattern":"${builtin.icp-console-url}/workloads/deployments/${resource.$.metadata.namespace}/${resource.$.metadata.name}", 
+        "url-pattern":"${builtin.openshift-console-url}/deployment/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}",
+{{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
+        # do not use / before k8s otherwise it will have // as openshift console url end with / already
+        "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/deployments/${resource.$.metadata.name}", 
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 
       }
+{{ end }}
     ]

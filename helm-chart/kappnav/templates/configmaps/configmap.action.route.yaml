@@ -16,26 +16,25 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kappnav.actions.job
+  name: kappnav.actions.route
   namespace: {{ .Release.Namespace }}
 data:
   url-actions: |
     [
-{{ if ne .Values.env.kubeEnv "minishift" }}      
       { 
         "name":"detail", 
         "text":"View Detail", 
-        "text.nls":"action.url.job.detail.text", 
-        "description":"View Job detail",
-        "description.nls":"action.url.job.detail.desc",
-{{ if eq .Values.env.kubeEnv "minikube" }}
-        "url-pattern":"${builtin.openshift-console-url}/job/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
+        "text.nls":"action.url.routes.detail.text", 
+        "description":"View Routes detail",
+        "description.nls":"action.url.routes.detail.desc",
+{{ if or (eq .Values.env.kubeEnv "minishift") }} 
+      # do not use / before project otherwise it will have // as openshift console url end with / already
+      "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/routes/${resource.$.metadata.name}",    
 {{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
-        # do not use / before k8s otherwise it will have // as openshift console url end with / already
-        "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/jobs/${resource.$.metadata.name}", 
+      # do not use / before k8s otherwise it will have // as openshift console url end with / already
+      "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/routes/${resource.$.metadata.name}",         
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 
       }
-{{ end }}
     ]

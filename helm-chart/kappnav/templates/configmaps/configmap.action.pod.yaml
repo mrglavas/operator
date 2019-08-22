@@ -28,9 +28,13 @@ data:
         "description":"View Pod detail",  
         "description.nls":"action.url.pod.detail.desc", 
 {{ if eq .Values.env.kubeEnv "minikube" }}
-        "url-pattern":"${builtin.icp-console-url}/pod/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
-{{ else }}
-        "url-pattern":"${builtin.icp-console-url}/workloads/deployments/${resource.$.metadata.namespace}/${snippet.get_name(${func.kubectlGet(deployments, -l, app=${resource.$.metadata.labels.app}, -n, ${resource.$.metadata.namespace}, -o, json)})}/pods/${resource.$.metadata.name}", 
+        "url-pattern":"${builtin.openshift-console-url}/pod/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
+{{ else if eq .Values.env.kubeEnv "minishift" }}
+        # do not use / before project otherwise it will have // as openshift console url end with / already
+        "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/pods/${resource.$.metadata.name}",
+{{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
+        # do not use / before k8s otherwise it will have // as openshift console url end with / already
+        "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/pods/${resource.$.metadata.name}",
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 

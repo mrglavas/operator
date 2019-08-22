@@ -74,7 +74,11 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
+{{ if eq .Values.env.kubeEnv "minikube" }} 
+            scheme: HTTP
+{{ else }}
             scheme: HTTPS
+{{ end }}
             port: 3000
           initialDelaySeconds: 20
           periodSeconds: 10  
@@ -82,7 +86,11 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
+{{ if eq .Values.env.kubeEnv "minikube" }} 
+            scheme: HTTP
+{{ else }}
             scheme: HTTPS
+{{ end }}
             port: 3000 
           initialDelaySeconds: 40
           periodSeconds: 30
@@ -93,11 +101,11 @@ spec:
 {{ toYaml .Values.appNavUI.resources.limits | indent 12 }}
           requests:
 {{ toYaml .Values.appNavUI.resources.requests | indent 12 }}
-          {{- end }}    
+          {{- end }}   
       volumes:
         - name: kappnav-ui-service-tls
           secret:
-            secretName: kappnav-ui-service-tls        
+            secretName: kappnav-ui-service-tls    
       restartPolicy: "Always" 
       serviceAccountName: {{ .Release.Name }}-sa
 {{ include "kappnav.pod.security" . | indent 6 }}

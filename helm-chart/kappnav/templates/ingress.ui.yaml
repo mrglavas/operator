@@ -21,7 +21,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /appnav
+          - path: /kappnav-ui
             backend:
               serviceName: kappnav-ui-service
               servicePort: 3000

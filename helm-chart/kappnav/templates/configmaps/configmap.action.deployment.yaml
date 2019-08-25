@@ -21,7 +21,6 @@ metadata:
 data:
   url-actions: |
     [
-{{ if or (eq .Values.env.kubeEnv "minishift") (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
       { 
         "name":"replicas", 
         "text":"View Replicas", 
@@ -31,10 +30,12 @@ data:
         # do not use / before project otherwise it will have // as openshift console url end with / already
         "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/deployment/${resource.$.metadata.name}", 
         "open-window": "current", 
-        "menu-item": "false" 
-      }
+{{ if or (eq .Values.env.kubeEnv "minishift") (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
+        "menu-item": "true" 
+{{ else }}       
+        "menu-item": "false"
 {{ end }}
-{{ if ne .Values.env.kubeEnv "minishift" }}
+      },
       { 
         "name":"detail", 
         "text":"View Detail", 
@@ -50,5 +51,4 @@ data:
         "open-window": "current", 
         "menu-item": "false" 
       }
-{{ end }}
     ]

@@ -28,6 +28,26 @@ spec:
         app.kubernetes.io/component: kappnav-ui 
     spec:
       containers:
+{{ if ne .Values.env.kubeEnv "minikube" }} 
+      - name: oauth-proxy
+        image: openshift/oauth-proxy:v1.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8443
+          name: public
+        args:
+        - --https-address=:8443
+        - --provider=openshift
+        - --openshift-service-account={{ .Release.Name }}-sa
+        - --upstream=http://localhost:3000
+        - --tls-cert=/etc/tls/private/tls.crt
+        - --tls-key=/etc/tls/private/tls.key
+        - --cookie-secret=SECRET
+        - --skip-auth-regex=.*appLauncher.js|.*featuredApp.js|.*appNavIcon.css|.*KAppNavlogo.svg
+        volumeMounts:
+          - mountPath: /etc/tls/private
+            name: kappnav-ui-service-tls
+{{ end }}
       - name: app-nav-api
         image: "{{ .Values.appNavApi.repository }}:{{ .Values.appNavApi.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -63,22 +83,19 @@ spec:
       - name: app-nav-ui
         image: "{{ .Values.appNavUI.repository }}:{{ .Values.appNavUI.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - containerPort: 3000
+            name: http
+            protocol: TCP
         env:
           - name: KAPPNAV_CONFIG_NAMESPACE
             value: {{ .Release.Namespace }}
           - name: KUBE_ENV
             value: {{ .Values.env.kubeEnv }}
-        volumeMounts:
-          - mountPath: /etc/tls/private
-            name: kappnav-ui-service-tls
         readinessProbe:
           httpGet:
             path: /health
-{{ if eq .Values.env.kubeEnv "minikube" }} 
             scheme: HTTP
-{{ else }}
-            scheme: HTTPS
-{{ end }}
             port: 3000
           initialDelaySeconds: 20
           periodSeconds: 10  
@@ -86,11 +103,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-{{ if eq .Values.env.kubeEnv "minikube" }} 
             scheme: HTTP
-{{ else }}
-            scheme: HTTPS
-{{ end }}
             port: 3000 
           initialDelaySeconds: 40
           periodSeconds: 30

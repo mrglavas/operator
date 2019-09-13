@@ -28,7 +28,7 @@ data:
         "description":"View Routes detail",
         "description.nls":"action.url.routes.detail.desc",
 {{ if or (eq .Values.env.kubeEnv "minishift") }} 
-      # do not use / before project otherwise it will have // as openshift console url end with / already
+      "url-pattern-comment":"# do not use / before k8s otherwise it will have // as openshift console url end with / already",
       "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/routes/${resource.$.metadata.name}",    
 {{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
       # do not use / before k8s otherwise it will have // as openshift console url end with / already

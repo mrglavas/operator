@@ -43,6 +43,8 @@ spec:
         - --tls-cert=/etc/tls/private/tls.crt
         - --tls-key=/etc/tls/private/tls.key
         - --cookie-secret=SECRET
+        - --cookie-name=ssn
+        - --cookie-expire=24h
         - --skip-auth-regex=.*appLauncher.js|.*featuredApp.js|.*appNavIcon.css|.*KAppNavlogo.svg
         volumeMounts:
           - mountPath: /etc/tls/private

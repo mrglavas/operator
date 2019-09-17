@@ -16,7 +16,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata: 
-  name: kappnav
+  name: kappnav-ui
 spec:
   replicas: 1
   selector:

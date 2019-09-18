@@ -28,7 +28,7 @@ data:
         "text.nls":"action.url.deployment.replicas.text", 
         "description":"View Deployment replicas", 
         "description.nls":"action.url.deployment.replicas.desc", 
-        # do not use / before project otherwise it will have // as openshift console url end with / already
+        "url-pattern-comment":"# do not use / before k8s otherwise it will have // as openshift console url end with / already",
         "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/deployment/${resource.$.metadata.name}", 
         "open-window": "current", 
         "menu-item": "true" 

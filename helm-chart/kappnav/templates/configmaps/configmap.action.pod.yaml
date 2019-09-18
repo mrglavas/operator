@@ -30,7 +30,7 @@ data:
 {{ if eq .Values.env.kubeEnv "minikube" }}
         "url-pattern":"${builtin.openshift-console-url}/pod/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
 {{ else if eq .Values.env.kubeEnv "minishift" }}
-        # do not use / before project otherwise it will have // as openshift console url end with / already
+        "url-pattern-comment":"# do not use / before k8s otherwise it will have // as openshift console url end with / already",
         "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/pods/${resource.$.metadata.name}",
 {{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
         # do not use / before k8s otherwise it will have // as openshift console url end with / already

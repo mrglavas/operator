@@ -15,6 +15,17 @@
 ###########################################################################
 FROM quay.io/operator-framework/helm-operator:v0.8.0
 
+ARG VERSION
+ARG BUILD_DATE
+
+LABEL name="Application Navigator" \
+      vendor="kAppNav" \
+      version=$VERSION \
+      release=$VERSION \
+      created=$BUILD_DATE \
+      summary="Operator image for Application Navigator" \
+      description="This image contains the operator for Application Navigator"
+
 COPY licenses/ ${HOME}/licenses
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-chart/ ${HOME}/helm-charts/

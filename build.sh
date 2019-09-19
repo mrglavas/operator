@@ -1,8 +1,7 @@
 #!/bin/bash
 IMAGE=kappnav-operator
+VERSION=0.1.1
 
-echo build $IMAGE ...
+echo "Building ${IMAGE} ${VERSION}"
 
-echo "Building ${IMAGE}"
-
-docker build -f build/Dockerfile -t ${IMAGE} . 
+docker build --build-arg VERSION=${VERSION} --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')  -f build/Dockerfile -t ${IMAGE} . 

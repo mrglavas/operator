@@ -17,9 +17,9 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: kappnavs.charts.helm.k8s.io
+  name: kappnavs.kappnav.io
 spec:
-  group: charts.helm.k8s.io
+  group: kappnav.io
   names:
     kind: KAppNav
     listKind: KAppNavList
@@ -105,7 +105,7 @@ spec:
               value: "helm-operator"
 ---
 
-apiVersion: charts.helm.k8s.io/v1alpha1
+apiVersion: kappnav.io/v1alpha1
 kind: KAppNav
 metadata:
   name: instance

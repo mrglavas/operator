@@ -26,6 +26,6 @@ LABEL name="Application Navigator" \
       summary="Operator image for Application Navigator" \
       description="This image contains the operator for Application Navigator"
 
-COPY licenses/ ${HOME}/licenses
+COPY licenses/ /licenses/
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-chart/ ${HOME}/helm-charts/

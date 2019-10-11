@@ -35,6 +35,8 @@ spec:
         env:
           - name: KAPPNAV_CONFIG_NAMESPACE
             value: {{ .Release.Namespace }}
+          - name: KUBE_ENV
+            value: {{ .Values.env.kubeEnv }}
         readinessProbe:
           exec:
             command:

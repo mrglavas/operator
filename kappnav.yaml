@@ -128,8 +128,8 @@ spec:
       constraints:
         enabled: false
       requests:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 10m
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -145,8 +145,8 @@ spec:
       constraints:
         enabled: false
       requests:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 10m
+        memory: 16Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -164,8 +164,8 @@ spec:
       constraints:
         enabled: false
       requests:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 50m
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -182,8 +182,8 @@ spec:
       constraints:
         enabled: false
       requests:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 10m
+        memory: 128Mi
       limits:
         cpu: 500m
         memory: 512Mi

@@ -90,7 +90,7 @@ spec:
       containers:
         - name: helm-operator
           # Replace this with the built image name
-          image: kappnav/operator:0.1.1
+          image: kappnav/operator:0.1.2
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -123,7 +123,7 @@ spec:
 
   appNavApi:
     repository: kappnav/apis
-    tag: 0.1.1
+    tag: 0.1.2
     resources:
       constraints:
         enabled: false
@@ -140,7 +140,7 @@ spec:
 
   appNavController:
     repository: kappnav/controller
-    tag: 0.1.1
+    tag: 0.1.2
     resources:
       constraints:
         enabled: false
@@ -157,7 +157,7 @@ spec:
 
   appNavUI:
     repository: kappnav/ui
-    tag: 0.1.1
+    tag: 0.1.2
     service:
       type: ClusterIP
     resources:
@@ -177,7 +177,7 @@ spec:
 
   appNavInit:
     repository: kappnav/init
-    tag: 0.1.1
+    tag: 0.1.2
     resources:
       constraints:
         enabled: false

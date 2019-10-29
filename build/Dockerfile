@@ -13,8 +13,19 @@
 # See the License for the specific language governing permissions and
 # imitations under the License.
 ###########################################################################
-FROM quay.io/operator-framework/helm-operator:v0.8.0
+FROM quay.io/operator-framework/helm-operator
 
-COPY licenses/ ${HOME}/licenses
+ARG VERSION
+ARG BUILD_DATE
+
+LABEL name="Application Navigator" \
+      vendor="kAppNav" \
+      version=$VERSION \
+      release=$VERSION \
+      created=$BUILD_DATE \
+      summary="Operator image for Application Navigator" \
+      description="This image contains the operator for Application Navigator"
+
+COPY licenses/ /licenses/
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-chart/ ${HOME}/helm-charts/

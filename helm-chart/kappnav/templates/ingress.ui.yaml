@@ -1,3 +1,4 @@
+{{ if eq .Values.env.kubeEnv "minikube" }}
 ###########################################################################
 # Copyright 2019 IBM Corporation
 #
@@ -29,3 +30,4 @@ spec:
             backend:
               serviceName: kappnav-ui-service
               servicePort: 3000
+{{ end }}

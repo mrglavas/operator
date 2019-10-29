@@ -50,6 +50,12 @@ spec:
           {{- end }}  
       restartPolicy: Never
       serviceAccountName: helm-operator
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .}}
+      - name: {{ . }}
+      {{- end }}
+      {{- end }}      
 {{ include "kappnav.pod.security" . | indent 6 }}
       tolerations:
       - effect: NoSchedule

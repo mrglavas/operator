@@ -14,14 +14,6 @@
 # imitations under the License.
 ###########################################################################
 
-###########################################################################
-#
-#  !!! Note below for the url-pattern:
-#  The path after ${builtin.openshift-admin-console-url} and before k8s does not use / to avoid double //
-#  because openshift admin console url ends with / already
-#
-###########################################################################
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -37,9 +29,9 @@ data:
         "description":"View Routes detail",
         "description.nls":"action.url.routes.detail.desc",
 {{ if or (eq .Values.env.kubeEnv "minishift") }} 
-      "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/routes/${resource.$.metadata.name}",    
+      "url-pattern":"${builtin.openshift-console-url}/project/${resource.$.metadata.namespace}/browse/routes/${resource.$.metadata.name}",    
 {{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
-      "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/routes/${resource.$.metadata.name}",         
+      "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/routes/${resource.$.metadata.name}",         
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 

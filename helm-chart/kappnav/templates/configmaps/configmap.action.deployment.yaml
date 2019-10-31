@@ -29,7 +29,7 @@ data:
         "text.nls":"action.url.deployment.replicas.text", 
         "description":"View Deployment replicas", 
         "description.nls":"action.url.deployment.replicas.desc", 
-        "url-pattern":"${builtin.openshift-console-url}/project/${resource.$.metadata.namespace}/browse/deployment/${resource.$.metadata.name}", 
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/replicasets/${func.replicaset()}", 
         "open-window": "current", 
         "menu-item": "true" 
       },

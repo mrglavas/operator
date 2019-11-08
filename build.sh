@@ -1,5 +1,9 @@
 #!/bin/bash
-. ../build/version.sh
+# Travis builds won't have a peer build dir
+VERSION=x.x.x
+if [ -e ../build/version.sh ]; then
+    . ../build/version.sh
+fi
 IMAGE=kappnav-operator
 
 # Update version numbers in yaml files

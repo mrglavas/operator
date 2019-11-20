@@ -92,5 +92,4 @@ data:
         "open-window": "current", 
         "menu-item": "false" 
       }
-{{ end }}
     ]

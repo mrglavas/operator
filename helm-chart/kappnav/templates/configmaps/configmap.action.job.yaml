@@ -47,7 +47,7 @@ data:
         "url-pattern":"${builtin.openshift-console-url}/project/${resource.$.metadata.namespace}/browse/pods/${var.podname}?tab=logs",
         "open-window": "tab"
       }
-    ],
+    ]
   variables: |
     {
         "podname": "${func.kubectlGet(pods,-l,job-name=${resource.$.metadata.name},-o=jsonpath=${snippet.name()})}"

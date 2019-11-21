@@ -55,7 +55,7 @@ spec:
       {{- range .}}
       - name: {{ . }}
       {{- end }}
-      {{- end }}      
+      {{- end }}
 {{ include "kappnav.pod.security" . | indent 6 }}
       tolerations:
       - effect: NoSchedule

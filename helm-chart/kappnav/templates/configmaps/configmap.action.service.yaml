@@ -14,14 +14,6 @@
 # imitations under the License.
 ###########################################################################
 
-###########################################################################
-#
-#  !!! Note below for the url-pattern:
-#  The path after ${builtin.openshift-admin-console-url} and before k8s does not use / to avoid double //
-#  because openshift admin console url ends with / already
-#
-###########################################################################
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,6 +22,68 @@ metadata:
 data:
   url-actions: |
     [
+{{ if or (eq .Values.env.kubeEnv "minishift") (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }}
+      { 
+        "name":"projdoc", 
+        "text":"View Project Doc", 
+        "text.nls":"action.url.deployment.projdoc.text", 
+        "description":"View project documentation.", 
+        "description.nls":"action.url.deployment.projdoc.desc", 
+{{ if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp")}}
+        "url-pattern":"${resource.$.metadata.annotations['image.opencontainers.org/documentation']}",
+{{ else }}
+        "url-pattern": "",
+{{ end }}
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-label": "stack.appsody.dev/id"
+      },
+      { 
+        "name":"projcode", 
+        "text":"View Project Code", 
+        "text.nls":"action.url.deployment.projcode.text", 
+        "description":"View project source code.", 
+        "description.nls":"action.url.deployment.projcode.desc", 
+{{ if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp")}}
+        "url-pattern":"${resource.$.metadata.annotations['image.opencontainers.org/source']}",
+{{ else }}
+        "url-pattern": "",
+{{ end }}
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-label": "stack.appsody.dev/id"
+      },
+      { 
+        "name":"kabcolldoc", 
+        "text":"View Collection Doc", 
+        "text.nls":"action.url.deployment.kabcolldoc.text", 
+        "description":"View Kabanero Collection Documentation.", 
+        "description.nls":"action.url.deployment.kabcolldoc.desc", 
+{{ if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp")}}
+        "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/documentation']}",
+{{ else }}
+        "url-pattern": "",
+{{ end }}
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-label": "stack.appsody.dev/id"
+      },
+      { 
+        "name":"kabcollcode", 
+        "text":"View Collection Code", 
+        "text.nls":"action.url.deployment.kabcollcode.text", 
+        "description":"View Kabanero collection source code.", 
+        "description.nls":"action.url.deployment.kabcollcode.desc", 
+{{ if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp")}}
+        "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/source']}",
+{{ else }}
+        "url-pattern": "",
+{{ end }}
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-label": "stack.appsody.dev/id" 
+      },
+{{ end }}
       { 
         "name":"detail", 
         "text":"View Detail",
@@ -39,9 +93,9 @@ data:
 {{ if eq .Values.env.kubeEnv "minikube" }}
         "url-pattern":"${builtin.openshift-console-url}/service/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
 {{ else if eq .Values.env.kubeEnv "minishift" }}
-        "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/services/${resource.$.metadata.name}",
+        "url-pattern":"${builtin.openshift-console-url}/project/${resource.$.metadata.namespace}/browse/services/${resource.$.metadata.name}",
 {{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
-        "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/services/${resource.$.metadata.name}",
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/services/${resource.$.metadata.name}",
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 

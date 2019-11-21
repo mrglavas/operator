@@ -30,7 +30,7 @@ spec:
       containers:
 {{ if ne .Values.env.kubeEnv "minikube" }} 
       - name: oauth-proxy
-        image: openshift/oauth-proxy:v1.1.0
+        image: quay.io/openshift/origin-oauth-proxy:4.3.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8443

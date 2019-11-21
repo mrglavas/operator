@@ -14,14 +14,6 @@
 # imitations under the License.
 ###########################################################################
 
-###########################################################################
-#
-#  !!! Note below for the url-pattern:
-#  The path after ${builtin.openshift-admin-console-url} and before k8s does not use / to avoid double //
-#  because openshift admin console url ends with / already
-#
-###########################################################################
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,17 +22,62 @@ metadata:
 data:
   url-actions: |
     [
-{{ if or (eq .Values.env.kubeEnv "minishift") (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }}
+      { 
+        "name":"projdoc", 
+        "text":"View Project Doc", 
+        "text.nls":"action.url.deployment.projdoc.text", 
+        "description":"View project documentation.", 
+        "description.nls":"action.url.deployment.projdoc.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['image.opencontainers.org/documentation']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "image.opencontainers.org/documentation"
+      },
+      { 
+        "name":"projcode", 
+        "text":"View Project Code", 
+        "text.nls":"action.url.deployment.projcode.text", 
+        "description":"View project source code.", 
+        "description.nls":"action.url.deployment.projcode.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['image.opencontainers.org/source']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "image.opencontainers.org/source"
+      },
+      { 
+        "name":"kabcolldoc", 
+        "text":"View Collection Doc", 
+        "text.nls":"action.url.deployment.kabcolldoc.text", 
+        "description":"View Kabanero Collection Documentation.", 
+        "description.nls":"action.url.deployment.kabcolldoc.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/documentation']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "stack.appsody.dev/documentation"
+      },
+      { 
+        "name":"kabcollcode", 
+        "text":"View Collection Code", 
+        "text.nls":"action.url.deployment.kabcollcode.text", 
+        "description":"View Kabanero collection source code.", 
+        "description.nls":"action.url.deployment.kabcollcode.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/source']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "stack.appsody.dev/source" 
+      },
+{{ if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }}
       { 
         "name":"replicas", 
         "text":"View Replicas", 
         "text.nls":"action.url.deployment.replicas.text", 
         "description":"View Deployment replicas", 
         "description.nls":"action.url.deployment.replicas.desc", 
-        "url-pattern":"${builtin.openshift-console-url}project/${resource.$.metadata.namespace}/browse/deployment/${resource.$.metadata.name}", 
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/replicasets/${func.replicaset()}", 
         "open-window": "current", 
         "menu-item": "true" 
       },
+{{ end }}
       { 
         "name":"detail", 
         "text":"View Detail", 
@@ -48,25 +85,11 @@ data:
         "description":"View Deployment detail", 
         "description.nls":"action.url.deployment.detail.desc", 
 {{ if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp")}}
-        "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/deployments/${resource.$.metadata.name}",
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/deployments/${resource.$.metadata.name}",
 {{ else }}
-        "url-pattern": "",
+        "url-pattern":"${builtin.openshift-console-url}/deployment/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}",
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 
       }
-{{ end }}
-        
-{{ if eq .Values.env.kubeEnv "minikube" }}       
-      { 
-        "name":"detail", 
-        "text":"View Detail", 
-        "text.nls":"action.url.deployment.detail.text", 
-        "description":"View Deployment detail", 
-        "description.nls":"action.url.deployment.detail.desc", 
-        "url-pattern":"${builtin.openshift-console-url}/deployment/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}",
-        "open-window": "current", 
-        "menu-item": "false" 
-      }  
-{{ end }}
     ]

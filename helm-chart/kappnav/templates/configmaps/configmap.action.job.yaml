@@ -14,14 +14,6 @@
 # imitations under the License.
 ###########################################################################
 
-###########################################################################
-#
-#  !!! Note below for the url-pattern:
-#  The path after ${builtin.openshift-admin-console-url} and before k8s does not use / to avoid double //
-#  because openshift admin console url ends with / already
-#
-###########################################################################
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -40,10 +32,28 @@ data:
 {{ if eq .Values.env.kubeEnv "minikube" }}
         "url-pattern":"${builtin.openshift-console-url}/job/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}", 
 {{ else if or (eq .Values.env.kubeEnv "okd") (eq .Values.env.kubeEnv "ocp") }} 
-        "url-pattern":"${builtin.openshift-admin-console-url}k8s/ns/${resource.$.metadata.namespace}/jobs/${resource.$.metadata.name}", 
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/jobs/${resource.$.metadata.name}", 
 {{ end }}
         "open-window": "current", 
         "menu-item": "false" 
-      }
+      },
 {{ end }}
-    ]
+      {
+        "name":"joblogs",
+        "text":"View Job Logs",
+        "text.nls":"action.url.job.logs.text",
+        "description":"View Job logs",
+        "description.nls":"action.url.job.logs.desc",
+        "url-pattern":"${builtin.openshift-console-url}/project/${resource.$.metadata.namespace}/browse/pods/${var.podname}?tab=logs",
+        "open-window": "tab"
+      }
+    ],
+  variables: |
+    {
+        "podname": "${func.kubectlGet(pods,-l,job-name=${resource.$.metadata.name},-o=jsonpath=${snippet.name()})}"
+
+    }
+  snippets:  |
+    {
+        "name": "function name() { return '{.items[*].metadata.name}'; }"
+    }

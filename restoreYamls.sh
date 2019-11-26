@@ -10,9 +10,13 @@ mkdir updatedYaml
 mv kappnav.yaml updatedYaml
 mv kappnav-delete.yaml updatedYaml
 mv kappnav-delete-CR.yaml updatedYaml
+mv deploy/default_values.yaml updatedYaml
+mv deploy/operator.yaml updatedYaml
 
 # Now that we've built the image and saved the updated files we can restore the original files
 mv backup/kappnav.yaml kappnav.yaml
 mv backup/kappnav-delete.yaml kappnav-delete.yaml
 mv backup/kappnav-delete-CR.yaml kappnav-delete-CR.yaml
+mv backup/default_values.yaml deploy/default_values.yaml
+mv backup/operator.yaml deploy/operator.yaml
 rmdir backup

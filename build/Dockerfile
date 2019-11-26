@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # imitations under the License.
 ###########################################################################
-FROM quay.io/operator-framework/helm-operator
+
+FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
 
 ARG VERSION
 ARG BUILD_DATE
+ARG PROJECT_NAME
 
 LABEL name="Application Navigator" \
       vendor="kAppNav" \
@@ -26,6 +28,28 @@ LABEL name="Application Navigator" \
       summary="Operator image for Application Navigator" \
       description="This image contains the operator for Application Navigator"
 
+ENV OPERATOR=/usr/local/bin/kappnav-operator \
+    USER_UID=1001 \
+    USER_NAME=kappnav-operator
+
+# install operator binary
+COPY build/_output/bin/${PROJECT_NAME} ${OPERATOR}
+
+# copying various resources into the image
+COPY deploy/default_values.yaml deploy/
+COPY deploy/maps/ maps/
+COPY deploy/crds/extensions crds/
+
+# get application CRD from Kubernetes Application SIG
+RUN curl -fsSLO --compressed https://raw.githubusercontent.com/kubernetes-sigs/application/master/config/crds/app_v1beta1_application.yaml \
+    && mv app_v1beta1_application.yaml crds/
+
+# copy license files into the image
 COPY licenses/ /licenses/
-COPY watches.yaml ${HOME}/watches.yaml
-COPY helm-chart/ ${HOME}/helm-charts/
+
+COPY build/bin /usr/local/bin
+RUN  /usr/local/bin/user_setup
+
+ENTRYPOINT ["/usr/local/bin/entrypoint"]
+
+USER ${USER_UID}

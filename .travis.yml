@@ -37,7 +37,7 @@ before_install:
   - sudo apt-get install -y dnsutils
   - sudo chgrp travis /var/run/docker.sock
   - docker version
-  - bash ./install-operator-sdk.sh
+  - bash .travis/install-operator-sdk.sh
 
 jobs:
   include:

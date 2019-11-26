@@ -1,0 +1,105 @@
+###############################################################################
+# Copyright 2019 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helm-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: helm-operator
+  template:
+    metadata:
+      labels:
+        name: helm-operator
+    spec:
+      serviceAccountName: helm-operator
+      containers:
+        - name: helm-operator
+          # Replace this with the built image name
+          image: kappnav/operator:0.1.0
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "helm-operator"
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: helm-operator
+subjects:
+- kind: ServiceAccount
+  name: helm-operator
+  namespace: kappnav
+roleRef:
+  kind: ClusterRole
+  name: helm-operator
+  apiGroup: rbac.authorization.k8s.io
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: helm-operator
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: helm-operator
+---
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: kappnavs.kappnav.io
+spec:
+  group: kappnav.io
+  names:
+    kind: KAppNav
+    listKind: KAppNavList
+    plural: kappnavs
+    singular: kappnav
+  scope: Namespaced
+  subresources:
+    status: {}
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true

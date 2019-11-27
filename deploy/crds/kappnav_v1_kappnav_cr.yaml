@@ -1,0 +1,11 @@
+apiVersion: kappnav.io/v1
+kind: Kappnav
+metadata:
+  name: kappnav
+spec:
+
+  ###############################################################################
+  ## Environmental variables
+  ###############################################################################
+  env:
+    kubeEnv: minikube

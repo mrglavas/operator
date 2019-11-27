@@ -1,0 +1,94 @@
+###########################################################################
+# Copyright 2019 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# imitations under the License.
+###########################################################################
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kappnav.actions.deployment
+data:
+  url-actions: |
+    [
+      { 
+        "name":"projdoc", 
+        "text":"View Project Doc", 
+        "text.nls":"action.url.deployment.projdoc.text", 
+        "description":"View project documentation.", 
+        "description.nls":"action.url.deployment.projdoc.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['image.opencontainers.org/documentation']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "image.opencontainers.org/documentation"
+      },
+      { 
+        "name":"projcode", 
+        "text":"View Project Code", 
+        "text.nls":"action.url.deployment.projcode.text", 
+        "description":"View project source code.", 
+        "description.nls":"action.url.deployment.projcode.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['image.opencontainers.org/source']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "image.opencontainers.org/source"
+      },
+      { 
+        "name":"kabcolldoc", 
+        "text":"View Collection Doc", 
+        "text.nls":"action.url.deployment.kabcolldoc.text", 
+        "description":"View Kabanero Collection Documentation.", 
+        "description.nls":"action.url.deployment.kabcolldoc.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/documentation']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "stack.appsody.dev/documentation"
+      },
+      { 
+        "name":"kabcollcode", 
+        "text":"View Collection Code", 
+        "text.nls":"action.url.deployment.kabcollcode.text", 
+        "description":"View Kabanero collection source code.", 
+        "description.nls":"action.url.deployment.kabcollcode.desc", 
+        "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/source']}",
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-annotation": "stack.appsody.dev/source" 
+      },
+{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp") }}
+      { 
+        "name":"replicas", 
+        "text":"View Replicas", 
+        "text.nls":"action.url.deployment.replicas.text", 
+        "description":"View Deployment replicas", 
+        "description.nls":"action.url.deployment.replicas.desc", 
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/replicasets/${func.replicaset()}", 
+        "open-window": "current", 
+        "menu-item": "true" 
+      },
+{{ end }}
+      { 
+        "name":"detail", 
+        "text":"View Detail", 
+        "text.nls":"action.url.deployment.detail.text", 
+        "description":"View Deployment detail", 
+        "description.nls":"action.url.deployment.detail.desc", 
+{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/deployments/${resource.$.metadata.name}",
+{{ else }}
+        "url-pattern":"${builtin.openshift-console-url}/deployment/${resource.$.metadata.namespace}/${resource.$.metadata.name}?namespace=${resource.$.metadata.namespace}",
+{{ end }}
+        "open-window": "current", 
+        "menu-item": "false" 
+      }
+    ]

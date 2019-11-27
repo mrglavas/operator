@@ -17,22 +17,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helm-operator
+  name: kappnav-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: helm-operator
+      name: kappnav-operator
   template:
     metadata:
       labels:
-        name: helm-operator
+        name: kappnav-operator
     spec:
-      serviceAccountName: helm-operator
+      serviceAccountName: kappnav-operator
       containers:
-        - name: helm-operator
+        - name: kappnav-operator
           # Replace this with the built image name
           image: kappnav/operator:KAPPNAV_VERSION
+          command:
+          - kappnav-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -44,27 +46,27 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "helm-operator"
+              value: "kappnav-operator"
 ---
 
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: helm-operator
+  name: kappnav-operator
 subjects:
 - kind: ServiceAccount
-  name: helm-operator
+  name: kappnav-operator
   namespace: kappnav
 roleRef:
   kind: ClusterRole
-  name: helm-operator
+  name: kappnav-operator
   apiGroup: rbac.authorization.k8s.io
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: helm-operator
+  name: kappnav-operator
 rules:
 - apiGroups:
   - '*'
@@ -81,7 +83,7 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: helm-operator
+  name: kappnav-operator
 ---
 
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -91,15 +93,15 @@ metadata:
 spec:
   group: kappnav.io
   names:
-    kind: KAppNav
-    listKind: KAppNavList
+    kind: Kappnav
+    listKind: KappnavList
     plural: kappnavs
     singular: kappnav
   scope: Namespaced
   subresources:
     status: {}
-  version: v1alpha1
+  version: v1
   versions:
-  - name: v1alpha1
+  - name: v1
     served: true
     storage: true

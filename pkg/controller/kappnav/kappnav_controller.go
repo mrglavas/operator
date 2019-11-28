@@ -31,6 +31,7 @@ import (
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -108,29 +109,29 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to secondary resource Deployment and requeue the owner Kappnav
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &kappnavv1.Kappnav{},
-	})
-	if err != nil {
-		return err
+	// Watch for changes to secondary resources that are always created by the operator
+	// (such as Deployment, ConfigMap, Service, etc...) and requeue the owner Kappnav
+	types := []runtime.Object{&appsv1.Deployment{}, &corev1.ConfigMap{}, &corev1.Secret{},
+		&corev1.Service{}, &corev1.ServiceAccount{}, &rbacv1.ClusterRoleBinding{}}
+	for i := range types {
+		err = c.Watch(&source.Kind{Type: types[i]}, &handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &kappnavv1.Kappnav{},
+		})
+		if err != nil {
+			return err
+		}
 	}
 
-	// Watch for changes to secondary resource ConfigMap and requeue the owner Kappnav
-	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &kappnavv1.Kappnav{},
-	})
-	if err != nil {
-		return err
+	// Watch for changes to secondary resources Ingress and Route
+	// (when available) and requeue the owner Kappnav
+	types = []runtime.Object{&extensionsv1beta1.Ingress{}, &routev1.Route{}}
+	for i := range types {
+		_ = c.Watch(&source.Kind{Type: types[i]}, &handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &kappnavv1.Kappnav{},
+		})
 	}
-
-	// Watch for changes to secondary resource Route (when available) and requeue the owner Kappnav
-	_ = c.Watch(&source.Kind{Type: &routev1.Route{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &kappnavv1.Kappnav{},
-	})
 	return nil
 }
 

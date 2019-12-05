@@ -6,6 +6,21 @@ Used to install Application Navigator. The operator is to read from a custom obj
 
 ## Build
 
+To build the project run:
+
+```
+cd <kappnav project root>/operator 
+./build.sh
+```
+
+This will compile the source within a Docker container and download required Go modules into the container at build time.
+
+## Install and Uninstall
+
+See [README](https://github.com/kappnav/README#install)
+
+## Local Development
+
 This project was developed with Operator SDK v0.10.0.
 
 Installation instructions for the Operator SDK CLI are here:
@@ -23,16 +38,14 @@ operator-sdk generate openapi
 
 This regenerates the CRD and the code that allows a Kappnav CR to be accessed programatically through the k8s APIs.
 
-To build the project run:
+To build the project using the Operator SDK run:
 
 ```
 cd <kappnav project root>/operator 
-./build.sh
+./buildWithSDK.sh
 ```
 
-## Install and Uninstall
-
-See [README](https://github.com/kappnav/README#install)
+This will compile the source in your local environment using your local set of dependencies.
 
 ## Default values
 

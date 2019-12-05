@@ -1,13 +1,16 @@
 module github.com/kappnav/operator
 
 require (
-	github.com/appsody/appsody-operator v0.2.0
-	github.com/coreos/prometheus-operator v0.29.0
 	github.com/go-openapi/spec v0.19.0
-	github.com/knative/serving v0.7.1-0.20190701162519-7ca25646a186
+	github.com/grpc-ecosystem/grpc-gateway v1.9.0 // indirect
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/operator-framework/operator-sdk v0.10.1-0.20190917191403-5f663690a3bb
+	github.com/prometheus/client_golang v0.9.3 // indirect
 	github.com/spf13/pflag v1.0.3
+	go.uber.org/atomic v1.4.0 // indirect
+	go.uber.org/zap v1.10.0 // indirect
+	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
+	google.golang.org/grpc v1.21.0 // indirect
 	k8s.io/api v0.0.0-20190612125737-db0771252981
 	k8s.io/apiextensions-apiserver v0.0.0-20190228180357-d002e88f6236
 	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad

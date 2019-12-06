@@ -29,3 +29,11 @@ LABEL name="Application Navigator" \
 COPY licenses/ /licenses/
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-chart/ ${HOME}/helm-charts/
+
+USER 0
+
+RUN microdnf install -y yum \
+    && yum update -y \
+    && microdnf remove yum
+
+USER 1001

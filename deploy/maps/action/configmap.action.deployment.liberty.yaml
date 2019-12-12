@@ -27,7 +27,7 @@ data:
         "text.nls":"action.url.liberty.metrics.mp1.1.text",
         "description":"View Liberty mp 1.1 Grafana dashboard",
         "description.nls":"action.url.liberty.metrics.mp1.1.desc",
-        "url-pattern":"${snippet.grafanaurl(${var.grafanahost},/d/websphere-liberty/${builtin.grafana-dashboard})}?refresh=10s&orgId=1&var-app=${resource.$.metadata.name}",
+        "url-pattern":"${snippet.grafanaurl(${var.grafanahost,default.undefined},/d/websphere-liberty/${builtin.grafana-dashboard})}?refresh=10s&orgId=1&var-app=${resource.$.metadata.name}",
         "open-window": "tab",
         "enablement-label":"kappnav.action.metrics.mp11"
       },
@@ -37,7 +37,7 @@ data:
         "text.nls":"action.url.liberty.metrics.mp2.0.text",
         "description":"View Liberty mp 2.0 Grafana dashboard",
         "description.nls":"action.url.liberty.metrics.mp2.0.desc",
-        "url-pattern":"${snippet.grafanaurl(${var.grafanahost},/d/websphere-liberty-m2/${builtin.grafana-m2-dashboard})}?refresh=10s&orgId=1&var-app=${resource.$.metadata.name}",
+        "url-pattern":"${snippet.grafanaurl(${var.grafanahost,default.undefined},/d/websphere-liberty-m2/${builtin.grafana-m2-dashboard})}?refresh=10s&orgId=1&var-app=${resource.$.metadata.name}",
         "open-window": "tab",
         "enablement-label":"kappnav.action.metrics.mp20"
       },  
@@ -47,7 +47,7 @@ data:
         "text.nls":"action.url.liberty.klog.text",
         "description":"View Liberty Kibana problem dashboard to see logs",
         "description.nls":"action.url.liberty.klog.desc",
-        "url-pattern":"${snippet.create_kibana_log_url(${snippet.kibanaurl(${var.kibanahost},${builtin.liberty-problems-dashboard})},${func.podlist()})}",
+        "url-pattern":"${snippet.create_kibana_log_url(${snippet.kibanaurl(${var.kibanahost,default.undefined},${builtin.liberty-problems-dashboard})},${func.podlist()})}",
         "open-window": "tab"
       }
     ]

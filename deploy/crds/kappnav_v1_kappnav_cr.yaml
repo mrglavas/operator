@@ -1,4 +1,4 @@
-apiVersion: kappnav.io/v1
+apiVersion: kappnav.operator.kappnav.io/v1
 kind: Kappnav
 metadata:
   name: kappnav

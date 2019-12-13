@@ -68,7 +68,7 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - kappnav.io
+  - kappnav.operator.kappnav.io
   resources:
   - '*'
   verbs:

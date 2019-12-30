@@ -43,7 +43,11 @@ data:
         "text.nls":"action.url.job.logs.text",
         "description":"View Job logs",
         "description.nls":"action.url.job.logs.desc",
+{{ if (eq .Spec.Env.KubeEnv "ocp") }} 
+        "url-pattern":"${builtin.openshift-console-url}/k8s/ns/${resource.$.metadata.namespace}/pods/${var.podname}/logs",
+{{ else if (eq .Spec.Env.KubeEnv "okd") }}
         "url-pattern":"${builtin.openshift-console-url}/project/${resource.$.metadata.namespace}/browse/pods/${var.podname}?tab=logs",
+{{ end }} 
         "open-window": "tab"
       }
     ]

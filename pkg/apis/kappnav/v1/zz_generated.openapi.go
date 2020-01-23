@@ -103,6 +103,19 @@ func schema_pkg_apis_kappnav_v1_KappnavSpec(ref common.ReferenceCallback) common
 							Ref: ref("./pkg/apis/kappnav/v1.Environment"),
 						},
 					},
+					"logging": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

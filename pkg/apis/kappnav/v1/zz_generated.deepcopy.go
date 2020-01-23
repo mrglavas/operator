@@ -196,6 +196,13 @@ func (in *KappnavSpec) DeepCopyInto(out *KappnavSpec) {
 		*out = new(Environment)
 		**out = **in
 	}
+	if in.Logging != nil {
+		in, out := &in.Logging, &out.Logging
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

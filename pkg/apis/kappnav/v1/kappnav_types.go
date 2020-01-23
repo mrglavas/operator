@@ -30,6 +30,7 @@ type KappnavSpec struct {
 	ExtensionContainers map[string]*KappnavContainerConfiguration `json:"extensionContainers,omitempty"`
 	Image               *KappnavImageConfiguration                `json:"image,omitempty"`
 	Env                 *Environment                              `json:"env,omitempty"`
+	Logging             map[string]string                         `json:"logging,omitempty"`
 }
 
 // KappnavContainerConfiguration defines the configuration for a Kappnav container

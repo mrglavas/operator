@@ -149,6 +149,10 @@ spec:
                     type: string
                   type: array
               type: object
+            logging:
+              additionalProperties:
+                type: string
+              type: object
           type: object
         status:
           properties:

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 IBM Corporation
+Copyright 2019, 2020 IBM Corporation
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -30,6 +30,7 @@ type KappnavSpec struct {
 	ExtensionContainers map[string]*KappnavContainerConfiguration `json:"extensionContainers,omitempty"`
 	Image               *KappnavImageConfiguration                `json:"image,omitempty"`
 	Env                 *Environment                              `json:"env,omitempty"`
+	Logging             map[string]string                         `json:"logging,omitempty"`
 }
 
 // KappnavContainerConfiguration defines the configuration for a Kappnav container

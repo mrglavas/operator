@@ -22,12 +22,30 @@ data:
   url-actions: |
     [
       { 
+        "name":"detail", 
+        "text":"View Detail", 
+        "text.nls":"action.url.deploymentconfig.detail.text", 
+        "description":"View DeploymentConfig detail", 
+        "description.nls":"action.url.deploymentconfig.detail.desc", 
+{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
+        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/deploymentconfigs/${resource.$.metadata.name}",
+{{ else }}
+        "url-pattern":"",
+{{ end }}
+        "open-window": "current", 
+        "menu-item": "false" 
+      },
+      { 
         "name":"appmetrics-dash", 
         "text":"View AppMetric-Dash", 
         "text.nls":"action.url.deploymentconfig.text", 
         "description":"View NodeJS AppMetric-Dash", 
         "description.nls":"action.url.deploymentconfig.desc", 
+{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
         "url-pattern":"http://${snippet.get_nodejs_route_host(${func.kubectlGet(Route,${resource.$.metadata.name},-n,${resource.$.metadata.namespace},-o,json)})}/appmetrics-dash",
+{{ else }}
+        "url-pattern":"",
+{{ end }}
         "open-window": "tab", 
         "menu-item": "true",
         "enablement-label": "kappnav.action.appmetrics"

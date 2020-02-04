@@ -17,22 +17,32 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kappnav.actions.deploymentconfig
+  name: kappnav.actions.deployment-nodejs
 data:
   url-actions: |
     [
       { 
-        "name":"detail", 
-        "text":"View Detail", 
-        "text.nls":"action.url.deploymentconfig.detail.text", 
-        "description":"View DeploymentConfig detail", 
-        "description.nls":"action.url.deploymentconfig.detail.desc", 
+        "name":"appmetrics-dash", 
+        "text":"View AppMetric-Dash", 
+        "text.nls":"action.url.nodejs.deployment.appmetric.text", 
+        "description":"View NodeJS AppMetric-Dash", 
+        "description.nls":"action.url.nodejs.deployment.appmetric.desc", 
 {{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
-        "url-pattern":"${builtin.openshift-admin-console-url}/k8s/ns/${resource.$.metadata.namespace}/deploymentconfigs/${resource.$.metadata.name}",
+        "url-pattern":"http://${snippet.get_nodejs_route_host(${func.kubectlGet(Route,${resource.$.metadata.name},-n,${resource.$.metadata.namespace},-o,json)})}/appmetrics-dash",
 {{ else }}
         "url-pattern":"",
 {{ end }}
-        "open-window": "current", 
-        "menu-item": "false" 
+        "open-window": "tab", 
+        "menu-item": "true",
+        "enablement-label": "kappnav.action.appmetrics"
       }
     ]
+
+  snippets: |
+    {
+        "get_nodejs_route_host": "function getNodeJSRouteHost(nodeJSRoute) { 
+            var nodeJSRouteJSON = JSON.parse(nodeJSRoute);
+            var host = nodeJSRouteJSON.spec.host;
+            return host;
+        }"
+    }

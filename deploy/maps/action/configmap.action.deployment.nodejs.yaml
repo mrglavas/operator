@@ -23,9 +23,9 @@ data:
     [
       { 
         "name":"appmetrics-dash", 
-        "text":"View AppMetric-Dash", 
+        "text":"View AppMetrics Dashboard", 
         "text.nls":"action.url.nodejs.deployment.appmetric.text", 
-        "description":"View NodeJS AppMetric-Dash", 
+        "description":"View NodeJS Application Metrics Dashboard for Deployment", 
         "description.nls":"action.url.nodejs.deployment.appmetric.desc", 
 {{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
         "url-pattern":"http://${snippet.get_nodejs_route_host(${func.kubectlGet(Route,${resource.$.metadata.name},-n,${resource.$.metadata.namespace},-o,json)})}/appmetrics-dash",

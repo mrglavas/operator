@@ -23,10 +23,10 @@ data:
     [
       { 
         "name":"appmetrics-dash", 
-        "text":"View AppMetric-Dash", 
-        "text.nls":"action.url.nodejs.deployment.appmetric.text", 
-        "description":"View NodeJS AppMetric-Dash", 
-        "description.nls":"action.url.nodejs.deployment.appmetric.desc", 
+        "text":"View App Metrics", 
+        "text.nls":"action.url.node.js.metrics.text", 
+        "description":"View Node.js App Metrics dashboard", 
+        "description.nls":"action.url.node.js.metrics.desc", 
 {{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
         "url-pattern":"http://${snippet.get_nodejs_route_host(${func.kubectlGet(Route,${resource.$.metadata.name},-n,${resource.$.metadata.namespace},-o,json)})}/appmetrics-dash",
 {{ else }}

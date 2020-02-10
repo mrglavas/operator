@@ -1,5 +1,5 @@
 ###########################################################################
-# Copyright 2019 IBM Corporation
+# Copyright 2019, 2020 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ COPY deploy/maps/ maps/
 COPY deploy/crds/extensions crds/
 
 # get application CRD from Kubernetes Application SIG
-RUN curl -fsSLO --compressed https://raw.githubusercontent.com/kubernetes-sigs/application/master/config/crds/app_v1beta1_application.yaml \
-    && mv app_v1beta1_application.yaml crds/
+RUN curl -fsSLO --compressed https://raw.githubusercontent.com/kubernetes-sigs/application/master/config/crd/bases/app.k8s.io_applications.yaml \
+    && mv app.k8s.io_applications.yaml crds/
 
 # copy license files into the image
 COPY licenses/ /licenses/

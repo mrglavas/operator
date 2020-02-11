@@ -21,21 +21,19 @@ metadata:
 data:
   url-actions: |
     [
+{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
       { 
         "name":"appmetrics-dash", 
         "text":"View App Metrics", 
         "text.nls":"action.url.node.js.metrics.text", 
         "description":"View Node.js App Metrics dashboard", 
         "description.nls":"action.url.node.js.metrics.desc", 
-{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
         "url-pattern":"http://${snippet.get_nodejs_route_host(${func.kubectlGet(Route,${resource.$.metadata.name},-n,${resource.$.metadata.namespace},-o,json)})}/appmetrics-dash",
-{{ else }}
-        "url-pattern":"",
-{{ end }}
         "open-window": "tab", 
         "menu-item": "true",
         "enablement-label": "kappnav.action.appmetrics"
       }
+{{ end }}
     ]
 
   snippets: |

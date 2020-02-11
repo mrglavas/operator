@@ -50,21 +50,19 @@ data:
         "url-pattern":"${snippet.create_kibana_log_url(${snippet.kibanaurl(${var.kibanahost,default.undefined},${builtin.liberty-problems-dashboard})},${func.podlist()})}",
         "open-window": "tab"
       },
+{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
       {
         "name": "console", 
         "text": "Access Admin Center",
         "text.nls": "action.url.liberty.app.console.text",
         "description": "Access Liberty Admin Center", 
         "description.nls": "action.url.liberty.app.console.desc", 
-{{ if or (eq .Spec.Env.KubeEnv "okd") (eq .Spec.Env.KubeEnv "ocp")}}
         "url-pattern":"https://${snippet.get_route_host(${func.kubectlGet(Route,-n,${resource.$.metadata.namespace},-o,json)})}/adminCenter",
-{{ else }}
-        "url-pattern":"",
-{{ end }}
         "open-window": "tab",
         "menu-item": "true",
         "enablement-label":"kappnav.actions.admincenter"
       }
+{{ end }}
     ]
   variables: |
     {

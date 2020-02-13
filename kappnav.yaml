@@ -154,3 +154,5 @@ spec:
 
   logging:
     apis: info
+    operator: info
+    controller: info

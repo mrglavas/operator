@@ -1,11 +1,12 @@
 module github.com/kappnav/operator
 
 require (
-	github.com/kubernetes-sigs/application v0.8.0
 	github.com/go-openapi/spec v0.19.0
 	github.com/grpc-ecosystem/grpc-gateway v1.9.0 // indirect
+	github.com/kubernetes-sigs/application v0.8.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/operator-framework/operator-sdk v0.10.1-0.20190917191403-5f663690a3bb
+	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v0.9.3 // indirect
 	github.com/spf13/pflag v1.0.3
 	go.uber.org/atomic v1.4.0 // indirect

@@ -331,15 +331,16 @@ func CustomizeKappnavConfigMap(kappnavConfig *corev1.ConfigMap, kappnavURL strin
 	if kappnavConfig.Data == nil {
 		kappnavConfig.Data = make(map[string]string)
 	}
+
 	value, _ := kappnavConfig.Data["status-color-mapping"]
 	if len(value) == 0 {
 		kappnavConfig.Data["status-color-mapping"] =
-			"{ \"values\": { \"Normal\": \"GREEN\", \"Warning\": \"YELLOW\", \"Problem\": \"RED\", \"Unknown\": \"GREY\"}," +
-				"\"colors\": { \"GREEN\":  \"#5aa700\", \"YELLOW\": \"#B4B017\", \"RED\": \"#A74343\", \"GREY\" : \"#808080\"} }"
+			"{ \"values\": { \"Normal\": \"GREEN\", \"Completed\": \"GREEN\", \"Pending\": \"YELLOW\", \"Warning\": \"YELLOW\", \"Problem\": \"RED\", \"Failed\": \"RED\", \"Unknown\": \"GREY\", \"In Progress\": \"BLUE\"}," +
+				"\"colors\": { \"GREEN\": \"#5aa700\", \"BLUE\": \"#4589ff\", \"YELLOW\": \"#B4B017\", \"RED\": \"#A74343\", \"GREY\": \"#808080\"} }"
 	}
 	value, _ = kappnavConfig.Data["app-status-precedence"]
 	if len(value) == 0 {
-		kappnavConfig.Data["app-status-precedence"] = "[ \"Problem\", \"Warning\", \"Unknown\", \"Normal\" ]"
+		kappnavConfig.Data["app-status-precedence"] = "[ \"Failed\", \"Problem\", \"Warning\", \"Pending\", \"In Progress\", \"Unknown\", \"Normal\", \"Completed\" ]"
 	}
 	value, _ = kappnavConfig.Data["status-unknown"]
 	if len(value) == 0 {

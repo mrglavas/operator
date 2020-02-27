@@ -1,5 +1,5 @@
 ###########################################################################
-# Copyright 2019 IBM Corporation
+# Copyright 2019, 2020 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ data:
       },
       { 
         "name":"kabcolldoc", 
-        "text":"View Collection Doc", 
+        "text":"View Stack Doc", 
         "text.nls":"action.url.deployment.kabcolldoc.text", 
-        "description":"View Kabanero Collection Documentation.", 
+        "description":"View Kabanero stack documentation.", 
         "description.nls":"action.url.deployment.kabcolldoc.desc", 
         "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/documentation']}",
         "open-window": "tab", 
@@ -56,9 +56,9 @@ data:
       },
       { 
         "name":"kabcollcode", 
-        "text":"View Collection Code", 
+        "text":"View Stack Code", 
         "text.nls":"action.url.deployment.kabcollcode.text", 
-        "description":"View Kabanero collection source code.", 
+        "description":"View Kabanero stack source code.", 
         "description.nls":"action.url.deployment.kabcollcode.desc", 
         "url-pattern":"${resource.$.metadata.annotations['stack.appsody.dev/source']}",
         "open-window": "tab", 

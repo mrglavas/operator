@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kappnav.actions.application.kappnav
+data:
+  cmd-actions: |
+    [
+      {
+        "name": "inventory",
+        "text": "Inventory",
+        "text.nls": "action.cmd.kappnav.inventory.text",
+        "description": "Take inventory of all kappnav resources.",
+        "description.nls": "action.cmd.kappnav.inventory.desc",
+        "image": "docker.io/cvignola/kappnav-inv:latest",
+        "cmd-pattern": "./inventory.sh"
+      }
+    ]

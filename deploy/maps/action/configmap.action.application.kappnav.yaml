@@ -6,7 +6,7 @@ data:
   cmd-actions: |
     [
       {
-        "name": "inventory",
+        "name": "app-nav-inventory",
         "text": "Inventory",
         "text.nls": "action.cmd.kappnav.inventory.text",
         "description": "Take inventory of all kappnav resources.",

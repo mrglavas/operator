@@ -90,7 +90,7 @@ spec:
       containers:
         - name: kappnav-operator
           # Replace this with the built image name
-          image: kappnav/operator:0.7.0
+          image: kappnav/operator:KAPPNAV_VERSION
           command:
           - kappnav-operator
           imagePullPolicy: Always
@@ -119,7 +119,7 @@ spec:
 
   appNavAPI:
     repository: kappnav/apis
-    tag: 0.7.0
+    tag: KAPPNAV_VERSION
     
   ###############################################################################
   ## kAppNav Controller variables
@@ -127,7 +127,7 @@ spec:
 
   appNavController:
     repository: kappnav/controller
-    tag: 0.7.0
+    tag: KAPPNAV_VERSION
     
   ###############################################################################
   ## kAppNav UI variables
@@ -135,7 +135,7 @@ spec:
 
   appNavUI:
     repository: kappnav/ui
-    tag: 0.7.0
+    tag: KAPPNAV_VERSION
 
   ###############################################################################
   ## kAppNav Inventory variables
@@ -144,7 +144,7 @@ spec:
   extensionContainers: 
     appNavInv: 
       repository: kappnav/inv
-      tag: 0.7.0
+      tag: KAPPNAV_VERSION
 
   ###############################################################################
   ## Environmental variables

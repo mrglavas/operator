@@ -10,7 +10,7 @@ spec:
 
   appNavAPI:
     repository: kappnav/apis
-    tag: 0.7.0
+    tag: KAPPNAV_VERSION
     resources:
       enabled: false
       requests:
@@ -26,7 +26,7 @@ spec:
 
   appNavController:
     repository: kappnav/controller
-    tag: 0.7.0
+    tag: KAPPNAV_VERSION
     resources:
       enabled: false
       requests:
@@ -42,7 +42,7 @@ spec:
 
   appNavUI:
     repository: kappnav/ui
-    tag: 0.7.0
+    tag: KAPPNAV_VERSION
     resources:
       enabled: false
       requests:
@@ -89,7 +89,7 @@ spec:
           memory: 512Mi
     appNavInv:
       repository: kappnav/inv
-      tag: 0.7.0
+      tag: KAPPNAV_VERSION
       resources:
         enabled: false
         requests:

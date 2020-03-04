@@ -16,7 +16,7 @@ spec:
       containers:
         - name: kappnav-operator
           # Replace this with the built image name
-          image: kappnav/operator:0.7.0
+          image: kappnav/operator:KAPPNAV_VERSION
           command:
           - kappnav-operator
           imagePullPolicy: Always

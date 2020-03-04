@@ -113,7 +113,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resources that are always created by the operator
 	// (such as Deployment, ConfigMap, Service, etc...) and requeue the owner Kappnav
 	types := []runtime.Object{&appsv1.Deployment{}, &corev1.ConfigMap{}, &corev1.Secret{},
-		&corev1.Service{}, &corev1.ServiceAccount{}, &rbacv1.ClusterRoleBinding{}}
+		&corev1.Service{}, &corev1.ServiceAccount{}, &rbacv1.ClusterRoleBinding{}, &appv1beta1.Application{}}
 	for i := range types {
 		err = c.Watch(&source.Kind{Type: types[i]}, &handler.EnqueueRequestForOwner{
 			IsController: true,

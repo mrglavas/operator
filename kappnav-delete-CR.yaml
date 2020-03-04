@@ -26,7 +26,7 @@ spec:
 
   appNavAPI:
     repository: kappnav/apis
-    tag: KAPPNAV_VERSION
+    tag: 0.7.0
     
   ###############################################################################
   ## kAppNav Controller variables
@@ -34,7 +34,7 @@ spec:
 
   appNavController:
     repository: kappnav/controller
-    tag: KAPPNAV_VERSION
+    tag: 0.7.0
     
   ###############################################################################
   ## kAppNav UI variables
@@ -42,7 +42,7 @@ spec:
 
   appNavUI:
     repository: kappnav/ui
-    tag: KAPPNAV_VERSION
+    tag: 0.7.0
 
   ###############################################################################
   ## Environmental variables

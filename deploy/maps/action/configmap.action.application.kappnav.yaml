@@ -11,7 +11,7 @@ data:
         "text.nls": "action.cmd.kappnav.inventory.text",
         "description": "Take inventory of all kappnav resources.",
         "description.nls": "action.cmd.kappnav.inventory.desc",
-        "image": "docker.io/cvignola/kappnav-inv:latest",
+        "image": "{{ .Spec.ExtensionContainers.appNavInv.Repository }}:{{ .Spec.ExtensionContainers.appNavInv.Tag }}",
         "cmd-pattern": "./inventory.sh"
       }
     ]

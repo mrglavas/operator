@@ -180,7 +180,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	kappnavName := &metav1.ObjectMeta{
-		Name:      instance.GetName(),
+		Name:      "kappnav",
 		Namespace: instance.GetNamespace(),
 	}
 

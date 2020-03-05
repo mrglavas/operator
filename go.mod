@@ -1,6 +1,7 @@
 module github.com/kappnav/operator
 
 require (
+	github.com/kubernetes-sigs/application v0.8.0
 	github.com/go-openapi/spec v0.19.0
 	github.com/grpc-ecosystem/grpc-gateway v1.9.0 // indirect
 	github.com/openshift/api v3.9.0+incompatible

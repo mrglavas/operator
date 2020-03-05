@@ -15,7 +15,9 @@ package utils
 
 import (
 	"strings"
+
 	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
+	appv1beta1 "github.com/kubernetes-sigs/application/pkg/apis/app/v1beta1"
 	routev1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -137,6 +139,19 @@ func CustomizeConfigMap(configMap *corev1.ConfigMap, instance *kappnavv1.Kappnav
 // CustomizeSecret ...
 func CustomizeSecret(secret *corev1.Secret, instance *kappnavv1.Kappnav) {
 	secret.Labels = GetLabels(instance, secret.Labels, &secret.ObjectMeta)
+}
+
+// CustomizeApplication ...
+func CustomizeApplication(app *appv1beta1.Application, instance *kappnavv1.Kappnav, annotations map[string]string) {
+	app.Labels = GetLabels(instance, app.Labels, &app.ObjectMeta)
+	if app.Annotations == nil {
+		app.Annotations = annotations
+	} else {
+		// Add annotations to the existing map.
+		for key, value := range annotations {
+			app.Annotations[key] = value
+		}
+	}
 }
 
 // CustomizeService ...
@@ -292,6 +307,7 @@ func CustomizeBuiltinConfigMap(builtinConfig *corev1.ConfigMap, r *ReconcilerBas
 					publicURL = clusterInfo.ConsoleBaseAddress
 					adminPublicURL = publicURL
 				}
+
 			} else {
 				clusterInfo := getOKDClusterInfo(r)
 				if clusterInfo != nil {
@@ -300,7 +316,7 @@ func CustomizeBuiltinConfigMap(builtinConfig *corev1.ConfigMap, r *ReconcilerBas
 				}
 			}
 			if len(value) == 0 && len(publicURL) > 0 {
-				builtinConfig.Data["openshift-console-url"]  = publicURL
+				builtinConfig.Data["openshift-console-url"] = publicURL
 			}
 			if len(adminValue) == 0 && len(adminPublicURL) > 0 {
 				builtinConfig.Data["openshift-admin-console-url"] = adminPublicURL

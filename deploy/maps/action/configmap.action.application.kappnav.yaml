@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kappnav.actions.application.kappnav
+data:
+  cmd-actions: |
+    [
+      {
+        "name": "app-nav-inventory",
+        "text": "Inventory",
+        "text.nls": "action.cmd.kappnav.inventory.text",
+        "description": "Take inventory of all kappnav resources.",
+        "description.nls": "action.cmd.kappnav.inventory.desc",
+        "image": "{{ .Spec.ExtensionContainers.appNavInv.Repository }}:{{ .Spec.ExtensionContainers.appNavInv.Tag }}",
+        "cmd-pattern": "./inventory.sh"
+      }
+    ]

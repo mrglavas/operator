@@ -53,7 +53,7 @@ data:
     ]
   variables: |
     {
-        "podname": "${func.kubectlGet(pods,-l,job-name=${resource.$.metadata.name},-o=jsonpath=${snippet.name()})}"
+        "podname": "${func.kubectlGet(pods,-l,job-name=${resource.$.metadata.name},-n,${resource.$.metadata.namespace},-o=jsonpath=${snippet.name()})}"
 
     }
   snippets:  |

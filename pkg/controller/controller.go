@@ -14,8 +14,9 @@ limitations under the License.
 package controller
 
 import (
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	appv1beta1 "github.com/kubernetes-sigs/application/pkg/apis/app/v1beta1"
 	routev1 "github.com/openshift/api/route/v1"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -30,6 +31,10 @@ func AddToManager(m manager.Manager) error {
 	}
 
 	if err := routev1.AddToScheme(m.GetScheme()); err != nil {
+		return err
+	}
+
+	if err := appv1beta1.AddToScheme(m.GetScheme()); err != nil {
 		return err
 	}
 

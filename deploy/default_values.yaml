@@ -52,6 +52,10 @@ spec:
         cpu: 500m
         memory: 512Mi
 
+  ###############################################################################
+  ## Settings for all images
+  ###############################################################################
+
   image:
     pullPolicy: Always
     pullSecrets: []
@@ -75,6 +79,17 @@ spec:
     oauthProxy:
       repository: quay.io/openshift/origin-oauth-proxy
       tag: 4.3.0
+      resources:
+        enabled: false
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    appNavInv:
+      repository: kappnav/inv
+      tag: KAPPNAV_VERSION
       resources:
         enabled: false
         requests:

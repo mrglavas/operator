@@ -19,12 +19,14 @@ FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
 ARG VERSION
 ARG BUILD_DATE
 ARG PROJECT_NAME
+ARG COMMIT
 
 LABEL name="Application Navigator" \
       vendor="kAppNav" \
       version=$VERSION \
       release=$VERSION \
       created=$BUILD_DATE \
+      commit=$COMMIT \
       summary="Operator image for Application Navigator" \
       description="This image contains the operator for Application Navigator"
 

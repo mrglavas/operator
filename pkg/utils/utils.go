@@ -592,6 +592,7 @@ func createOAuthProxyArgs(instance *kappnavv1.Kappnav) []string {
 		"--cookie-secret=SECRET",
 		"--cookie-name=ssn",
 		"--cookie-expire=24h",
+		"--skip-provider-button=true",
 		"--skip-auth-regex=.*appLauncher.js|.*featuredApp.js|.*appNavIcon.css|.*KAppNavlogo.svg",
 	}
 }

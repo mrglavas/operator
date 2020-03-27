@@ -14,12 +14,18 @@ limitations under the License.
 package utils
 
 import (
+	"fmt"
+	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
-	
+	"time"
+
 	kamv1 "github.com/kappnav/operator/pkg/apis/actions/v1"
 	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
 	appv1beta1 "github.com/kubernetes-sigs/application/pkg/apis/app/v1beta1"
 	routev1 "github.com/openshift/api/route/v1"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
@@ -33,7 +39,7 @@ import (
 
 // KappnavExtension extends the reconciler to manage additional resources.
 type KappnavExtension interface {
-	ReconcileAdditionalResources(request reconcile.Request, r *ReconcilerBase, instance *kappnavv1.Kappnav) (reconcile.Result, error)
+	ReconcileAdditionalResources(logger Logger, request reconcile.Request, r *ReconcilerBase, instance *kappnavv1.Kappnav) (reconcile.Result, error)
 }
 
 const (
@@ -91,7 +97,7 @@ func GetLabels(instance *kappnavv1.Kappnav,
 }
 
 // CustomizeServiceAccount ...
-func CustomizeServiceAccount(sa *corev1.ServiceAccount, uiService *metav1.ObjectMeta, instance *kappnavv1.Kappnav) {
+func CustomizeServiceAccount(logger Logger, sa *corev1.ServiceAccount, uiService *metav1.ObjectMeta, instance *kappnavv1.Kappnav) {
 	sa.Labels = GetLabels(instance, sa.Labels, &sa.ObjectMeta)
 	if sa.Annotations == nil {
 		sa.Annotations = make(map[string]string)
@@ -284,7 +290,7 @@ func CustomizePodSpec(pts *corev1.PodTemplateSpec, parentComponent *metav1.Objec
 }
 
 // CustomizeBuiltinConfigMap ...
-func CustomizeBuiltinConfigMap(builtinConfig *corev1.ConfigMap, r *ReconcilerBase, instance *kappnavv1.Kappnav) {
+func CustomizeBuiltinConfigMap(logger Logger, builtinConfig *corev1.ConfigMap, r *ReconcilerBase, instance *kappnavv1.Kappnav) {
 	// Initialize the config map or restore values if they have been deleted.
 	if builtinConfig.Data == nil {
 		builtinConfig.Data = make(map[string]string)
@@ -303,14 +309,14 @@ func CustomizeBuiltinConfigMap(builtinConfig *corev1.ConfigMap, r *ReconcilerBas
 			var publicURL string
 			var adminPublicURL string
 			if IsOCP(kubeEnv) {
-				clusterInfo := getOCPClusterInfo(r)
+				clusterInfo := getOCPClusterInfo(logger, r)
 				if clusterInfo != nil {
 					publicURL = clusterInfo.ConsoleBaseAddress
 					adminPublicURL = publicURL
 				}
 
 			} else {
-				clusterInfo := getOKDClusterInfo(r)
+				clusterInfo := getOKDClusterInfo(logger, r)
 				if clusterInfo != nil {
 					publicURL = clusterInfo.ConsolePublicURL
 					adminPublicURL = clusterInfo.AdminConsolePublicURL
@@ -685,10 +691,12 @@ type OCPClusterInfo struct {
 	ConsoleBaseAddress string `yaml:"consoleBaseAddress,omitempty"`
 }
 
-func getOCPClusterInfo(r *ReconcilerBase) *OCPClusterInfo {
-	config, err := r.GetOperatorConfigMap("console-config", "openshift-console")
+func getOCPClusterInfo(logger Logger, r *ReconcilerBase) *OCPClusterInfo {
+	config, err := r.GetOperatorConfigMap(logger, "console-config", "openshift-console")
 	if err != nil {
-		log.Error(err, "Could not retrieve console-config ConfigMap for OCP.")
+		if logger.IsEnabled(LogTypeError) {
+			logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not retrieve console-config ConfigMap for OCP, Error: %s ", err), logName)
+		}
 		return nil
 	}
 	if config.Data != nil {
@@ -697,7 +705,9 @@ func getOCPClusterInfo(r *ReconcilerBase) *OCPClusterInfo {
 			consoleConfig := &OCPConsoleConfig{}
 			err = yaml.Unmarshal([]byte(value), consoleConfig)
 			if err != nil {
-				log.Error(err, "Could not parse console-config.yaml.")
+				if logger.IsEnabled(LogTypeError) {
+					logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not parse console-config.yaml, Error: %s ", err), logName)
+				}
 				return nil
 			}
 			address := consoleConfig.ClusterInfo.ConsoleBaseAddress
@@ -709,7 +719,9 @@ func getOCPClusterInfo(r *ReconcilerBase) *OCPClusterInfo {
 			return &consoleConfig.ClusterInfo
 		}
 	}
-	log.Info("Could not retrieve cluster info from console-config for OCP.")
+	if logger.IsEnabled(LogTypeInfo) {
+		logger.Log(CallerName(), LogTypeInfo, "Could not retrieve cluster info from console-config for OCP.", logName)
+	}
 	return nil
 }
 
@@ -724,10 +736,12 @@ type OKDClusterInfo struct {
 	AdminConsolePublicURL string `yaml:"adminConsolePublicURL,omitempty"`
 }
 
-func getOKDClusterInfo(r *ReconcilerBase) *OKDClusterInfo {
-	config, err := r.GetOperatorConfigMap("webconsole-config", "openshift-web-console")
+func getOKDClusterInfo(logger Logger, r *ReconcilerBase) *OKDClusterInfo {
+	config, err := r.GetOperatorConfigMap(logger, "webconsole-config", "openshift-web-console")
 	if err != nil {
-		log.Error(err, "Could not retrieve webconsole-config ConfigMap for OKD.")
+		if logger.IsEnabled(LogTypeError) {
+			logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not retrieve webconsole-config ConfigMap for OKD, Error: %s ", err), logName)
+		}
 		return nil
 	}
 	if config.Data != nil {
@@ -736,7 +750,9 @@ func getOKDClusterInfo(r *ReconcilerBase) *OKDClusterInfo {
 			consoleConfig := &OKDConsoleConfig{}
 			err = yaml.Unmarshal([]byte(value), consoleConfig)
 			if err != nil {
-				log.Error(err, "Could not parse webconsole-config.yaml.")
+				if logger.IsEnabled(LogTypeError) {
+					logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not parse webconsole-config.yaml, Error: %s ", err), logName)
+				}
 				return nil
 			}
 			publicURL := consoleConfig.ClusterInfo.ConsolePublicURL
@@ -754,7 +770,9 @@ func getOKDClusterInfo(r *ReconcilerBase) *OKDClusterInfo {
 			return &consoleConfig.ClusterInfo
 		}
 	}
-	log.Info("Could not retrieve cluster info from webconsole-config for OKD.")
+	if logger.IsEnabled(LogTypeInfo) {
+		logger.Log(CallerName(), LogTypeInfo, "Could not retrieve cluster info from webconsole-config for OKD.", logName)
+	}
 	return nil
 }
 
@@ -782,3 +800,48 @@ func SetCondition(condition kappnavv1.StatusCondition, status *kappnavv1.Kappnav
 	}
 	status.Conditions = append(status.Conditions, condition)
 }
+
+// CallerName get the caller program file name, line number and function name in "fileName:line# funcName"
+func CallerName() string {
+	var callerName string
+	pc, fileName, line, _ := runtime.Caller(1)
+
+	// get function name
+	funcNameFull := runtime.FuncForPC(pc).Name()
+	funcNameEnd := filepath.Ext(funcNameFull)
+	funcName := strings.TrimPrefix(funcNameEnd, ".")
+
+	// get file name
+	suffix := ".go"
+	_, nf := filepath.Split(fileName)
+	if strings.HasSuffix(nf, ".go") {
+		fileName = strings.TrimSuffix(nf, suffix)
+		callerName = fileName + suffix + ":" + strconv.Itoa(line) + " " + funcName
+	}
+	return callerName
+}
+
+//ErrorWithStack print stack trace for error message
+func ErrorWithStack(msg string) string {
+	cause := errors.New(msg)
+	err := errors.WithStack(cause)
+	s := fmt.Sprintf("%+v", err)
+	return s
+}
+
+//FormatTimeStamp format with unix seconds in float
+func FormatTimestamp(t time.Time) float64 {
+	s := fmt.Sprintf("%10.7f", float64(t.UnixNano())/1e9)
+	ts, _ := strconv.ParseFloat(s, 64)
+	return ts
+}
+
+/*
+func contains(arr []string, corev1.LocalObjectReference) bool {
+	for _, a := range arr {
+	   if a == str {
+		  return true
+	   }
+	}
+	return false
+ } */

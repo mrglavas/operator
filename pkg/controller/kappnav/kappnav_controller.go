@@ -16,6 +16,7 @@ package kappnav
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -38,12 +39,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/yaml"
 )
 
-var log = logf.Log.WithName("controller_kappnav")
+var logName = "controller_kappnav"
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -53,41 +53,58 @@ var log = logf.Log.WithName("controller_kappnav")
 // Add creates a new Kappnav Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	logger := kappnavutils.NewLogger(true) //log in json format
+
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Creating a new kappnav controller and adds it to the manager", logName)
+	}
+	return add(logger, mgr, newReconciler(logger, mgr))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
+func newReconciler(logger kappnavutils.Logger, mgr manager.Manager) reconcile.Reconciler {
 	reconciler := &ReconcileKappnav{ReconcilerBase: kappnavutils.NewReconcilerBase(mgr.GetClient(),
 		mgr.GetScheme(), mgr.GetConfig(), mgr.GetRecorder("kappnav-operator"))}
 
 	// Create CRDs if they do not already exist.
+	//test
 	files, err := ioutil.ReadDir("crds")
 	if err != nil {
-		log.Error(err, "Failed to read directory: crds")
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to read directory: crds, error: %s", err), logName)
+		}
 		os.Exit(1)
 	}
 	for _, file := range files {
 		if !file.IsDir() {
 			fileName := "crds/" + file.Name()
 			if strings.HasSuffix(fileName, ".yaml") || strings.HasSuffix(fileName, ".yml") {
+				if logger.IsEnabled(kappnavutils.LogTypeDebug) {
+					logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeDebug, fmt.Sprintf("Read file from the image: ", fileName), logName)
+				}
 				// Read the file from the image.
 				fData, err := ioutil.ReadFile(fileName)
 				if err != nil {
-					log.Error(err, "Failed to read file: "+fileName)
+					if logger.IsEnabled(kappnavutils.LogTypeError) {
+						logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to read file: %s, error: %s", fileName, err), logName)
+					}
 					os.Exit(1)
 				}
 				crd := &apiextensionsv1beta1.CustomResourceDefinition{}
 				// Unmarshal the YAML into an object.
 				err = yaml.Unmarshal(fData, crd)
 				if err != nil {
-					log.Error(err, "Failed to unmarshal YAML file: "+fileName)
+					if logger.IsEnabled(kappnavutils.LogTypeError) {
+						logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to unmarshal YAML file: %s, error: %s", fileName, err), logName)
+					}
 					os.Exit(1)
 				}
 				// Create the CRD if it does not already exist.
 				err = reconciler.GetClient().Create(context.TODO(), crd)
 				if err != nil && !errors.IsAlreadyExists(err) {
-					log.Error(err, "Failed to create CRD: "+crd.GetName())
+					if logger.IsEnabled(kappnavutils.LogTypeError) {
+						logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to create CRD: %s, error: %s", crd.GetName(), err), logName)
+					}
 					os.Exit(1)
 				}
 			}
@@ -98,7 +115,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
+func add(logger kappnavutils.Logger, mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
 	c, err := controller.New("kappnav-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
@@ -107,13 +124,18 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for changes to primary resource Kappnav
 	err = c.Watch(&source.Kind{Type: &kappnavv1.Kappnav{}}, &handler.EnqueueRequestForObject{})
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Watch for changes to primary resource", logName)
+	}
+
 	if err != nil {
 		return err
 	}
 
 	// Watch for changes to secondary resources that are always created by the operator
 	// (such as Deployment, ConfigMap, Service, etc...) and requeue the owner Kappnav
-	types := []runtime.Object{&appsv1.Deployment{},
+	types := []runtime.Object{
+		&appsv1.Deployment{},
 		&corev1.ConfigMap{},
 		&corev1.Secret{},
 		&corev1.Service{},
@@ -121,6 +143,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&rbacv1.ClusterRoleBinding{},
 		&appv1beta1.Application{},
 		&kamv1.KindActionMapping{}}
+
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Watch for changes to secondary resource", logName)
+	}
 	for i := range types {
 		err = c.Watch(&source.Kind{Type: types[i]}, &handler.EnqueueRequestForOwner{
 			IsController: true,
@@ -159,11 +185,19 @@ type ReconcileKappnav struct {
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling Kappnav")
+	logger := kappnavutils.NewLogger(true) //log in json format
+	var otherLogData = " in Request.Namespace: " + request.Namespace + ", Request.Name: " + request.Name
+
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Reconciling Kappnav"+otherLogData, logName)
+	}
 
 	// Fetch the Kappnav instance
 	instance := &kappnavv1.Kappnav{}
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Fetch kappnav instance"+otherLogData, logName)
+	}
+
 	err := r.GetClient().Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -181,9 +215,26 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Apply defaults to the Kappnav instance
 	err = kappnavutils.SetKappnavDefaults(instance)
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Apply defaults to kappnav instance"+otherLogData, logName)
+	}
 	if err != nil {
-		reqLogger.Error(err, "Failed to process default values file")
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to process default values file"+otherLogData+", Error: %s", err), logName)
+		}
 		return reconcile.Result{}, err
+	}
+
+	// Retrieve logging info from kappnav CR and update the kappnavutils level
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Retrieve kappnavutils info from kappnav CR"+otherLogData, logName)
+	}
+	loggingMap := instance.Spec.Logging
+	if len(loggingMap["operator"]) > 0 {
+		if logger.IsEnabled(kappnavutils.LogTypeDebug) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeDebug, fmt.Sprintf("Set the log level to ", loggingMap["operator"])+otherLogData, logName)
+		}
+		setLoggingLevel(logger, loggingMap["operator"])
 	}
 
 	kappnavName := &metav1.ObjectMeta{
@@ -196,20 +247,25 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		Namespace: instance.GetNamespace(),
 	}
 
-	// Create or update service account
 	serviceAccount := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName() + "-" + kappnavutils.ServiceAccountNameSuffix,
 			Namespace: instance.GetNamespace(),
 		},
 	}
-	err = r.CreateOrUpdate(serviceAccount, instance, func() error {
-		kappnavutils.CustomizeServiceAccount(serviceAccount, uiServiceAndRouteName, instance)
+	// Create or update service account
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update service account"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, serviceAccount, instance, func() error {
+		kappnavutils.CustomizeServiceAccount(logger, serviceAccount, uiServiceAndRouteName, instance)
 		return nil
 	})
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the ServiceAccount")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the ServiceAccount"+otherLogData+", Error: %s ", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// Create or update cluster role binding
@@ -219,13 +275,18 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 	}
-	err = r.CreateOrUpdate(crb, instance, func() error {
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update cluster role binding"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, crb, instance, func() error {
 		kappnavutils.CustomizeClusterRoleBinding(crb, serviceAccount, instance)
 		return nil
 	})
 	if err != nil && !errors.IsAlreadyExists(err) {
-		reqLogger.Error(err, "Failed to reconcile the ClusterRoleBinding")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the ClusterRoleBinding"+otherLogData+", Error: %s ", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// Dummy secret for Minikube support
@@ -245,13 +306,15 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// Create or update the kappnav Application
-	err = r.CreateOrUpdate(kappnavCR, instance, func() error {
+	err = r.CreateOrUpdate(logger, kappnavCR, instance, func() error {
 		kappnavutils.CustomizeApplication(kappnavCR, instance, kappnavCRAnnotations)
 		return nil
 	})
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the kappnav Application")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the kappnav Application"+otherLogData+", Error: %s ", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// The UI service
@@ -268,23 +331,33 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	isMinikube := kappnavutils.IsMinikubeEnv(instance.Spec.Env.KubeEnv)
 	if isMinikube {
 		// Create or update dummy secret
-		err = r.CreateOrUpdate(dummySecret, instance, func() error {
+		err = r.CreateOrUpdate(logger, dummySecret, instance, func() error {
 			kappnavutils.CustomizeSecret(dummySecret, instance)
 			return nil
 		})
+		if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update dummy secret"+otherLogData, logName)
+		}
 		if err != nil {
-			reqLogger.Error(err, "Failed to reconcile the dummy secret")
-			return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+			if logger.IsEnabled(kappnavutils.LogTypeError) {
+				logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the dummy secret"+otherLogData+", Error: %s ", err), logName)
+			}
+			return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 		}
 		// Create or update the UI service
-		err = r.CreateOrUpdate(uiService, instance, func() error {
+		err = r.CreateOrUpdate(logger, uiService, instance, func() error {
 			kappnavutils.CustomizeService(uiService, instance, uiServiceAnnotations)
 			kappnavutils.CustomizeUIServiceSpec(&uiService.Spec, instance)
 			return nil
 		})
+		if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI service"+otherLogData, logName)
+		}
 		if err != nil {
-			reqLogger.Error(err, "Failed to reconcile the UI service")
-			return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+			if logger.IsEnabled(kappnavutils.LogTypeError) {
+				logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI service"+otherLogData+", Error: %s ", err), logName)
+			}
+			return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 		}
 		// Create or update UI ingress
 		uiIngress := &extensionsv1beta1.Ingress{
@@ -293,38 +366,53 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 				Namespace: instance.GetNamespace(),
 			},
 		}
-		err = r.CreateOrUpdate(uiIngress, instance, func() error {
+		if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI ingress"+otherLogData, logName)
+		}
+		err = r.CreateOrUpdate(logger, uiIngress, instance, func() error {
 			kappnavutils.CustomizeIngress(uiIngress, instance)
 			kappnavutils.CustomizeUIIngressSpec(&uiIngress.Spec, uiService, instance)
 			return nil
 		})
 		if err != nil {
-			reqLogger.Error(err, "Failed to reconcile the UI ingress")
-			return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+			if logger.IsEnabled(kappnavutils.LogTypeError) {
+				logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI ingress"+otherLogData+", Error: %s ", err), logName)
+			}
+			return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 		}
 	} else {
 		// Create or update the UI service
-		err = r.CreateOrUpdate(uiService, instance, func() error {
+		err = r.CreateOrUpdate(logger, uiService, instance, func() error {
 			kappnavutils.CustomizeService(uiService, instance, uiServiceAnnotations)
 			kappnavutils.CustomizeUIServiceSpec(&uiService.Spec, instance)
 			return nil
 		})
+		if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI service"+otherLogData, logName)
+		}
 		if err != nil {
-			reqLogger.Error(err, "Failed to reconcile the UI service")
-			return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+			if logger.IsEnabled(kappnavutils.LogTypeError) {
+				logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI Service"+otherLogData+", Error: %s ", err), logName)
+			}
+			return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 		}
 		// Create or update UI route
 		uiRoute := &routev1.Route{
 			ObjectMeta: *uiServiceAndRouteName,
 		}
-		err = r.CreateOrUpdate(uiRoute, instance, func() error {
+		err = r.CreateOrUpdate(logger, uiRoute, instance, func() error {
 			kappnavutils.CustomizeRoute(uiRoute, instance)
 			kappnavutils.CustomizeUIRouteSpec(&uiRoute.Spec, uiServiceAndRouteName, instance)
 			return nil
 		})
+		if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI route"+otherLogData, logName)
+		}
 		if err != nil {
-			reqLogger.Error(err, "Failed to reconcile the UI route")
-			return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+			if logger.IsEnabled(kappnavutils.LogTypeError) {
+				logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI route"+otherLogData+", Error: %s ", err), logName)
+			}
+			return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 		}
 		// Compute Kappnav URL from route.
 		routeHost := uiRoute.Spec.Host
@@ -335,42 +423,61 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// Create or update action, section and status config maps.
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update action, section and status config maps"+otherLogData, logName)
+	}
 	mapDirs := []string{"maps/action", "maps/sections", "maps/status"}
 	for _, dir := range mapDirs {
+		if logger.IsEnabled(kappnavutils.LogTypeDebug) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeDebug, "Read dir: "+dir+otherLogData, logName)
+		}
 		files, err := ioutil.ReadDir(dir)
 		if err != nil {
-			reqLogger.Error(err, "Failed to read directory: "+dir)
-			return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+			if logger.IsEnabled(kappnavutils.LogTypeError) {
+				logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the read directory %s "+otherLogData+", Error: %s ", dir, err), logName)
+			}
+			return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 		}
 		for _, file := range files {
 			if !file.IsDir() {
 				fileName := dir + "/" + file.Name()
 				if strings.HasSuffix(fileName, ".yaml") || strings.HasSuffix(fileName, ".yml") {
+					if logger.IsEnabled(kappnavutils.LogTypeDebug) {
+						logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeDebug, "Read file: "+fileName+otherLogData, logName)
+					}
 					// Read the file from the image.
 					fData, err := ioutil.ReadFile(fileName)
 					if err != nil {
-						reqLogger.Error(err, "Failed to read file: "+fileName)
-						return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+						if logger.IsEnabled(kappnavutils.LogTypeError) {
+							logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to read file: %s "+otherLogData+", Error: %s ", fileName, err), logName)
+						}
+						return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 					}
 					// Parse the file into a template.
 					t, err := template.New(fileName).Parse(string(fData))
 					if err != nil {
-						reqLogger.Error(err, "Failed to parse template file: "+fileName)
-						return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+						if logger.IsEnabled(kappnavutils.LogTypeError) {
+							logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to parse template file: %s "+otherLogData+", Error: %s ", fileName, err), logName)
+						}
+						return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 					}
 					// Execute the template against the Kappnav CR instance.
 					var buf bytes.Buffer
 					err = t.Execute(&buf, instance)
 					if err != nil {
-						reqLogger.Error(err, "Failed to execute template: "+fileName)
-						return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+						if logger.IsEnabled(kappnavutils.LogTypeError) {
+							logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to execute template: %s "+otherLogData+", Error: %s ", fileName, err), logName)
+						}
+						return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 					}
 					configMap := &corev1.ConfigMap{}
 					// Unmarshal the YAML into an object.
 					err = yaml.Unmarshal(buf.Bytes(), configMap)
 					if err != nil {
-						reqLogger.Error(err, "Failed to unmarshal YAML file: "+fileName)
-						return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+						if logger.IsEnabled(kappnavutils.LogTypeError) {
+							logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to unmarshal YAML file: %s "+otherLogData+", Error: %s", fileName, err), logName)
+						}
+						return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 					}
 					clusterMap := &corev1.ConfigMap{
 						ObjectMeta: metav1.ObjectMeta{
@@ -379,7 +486,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 						},
 					}
 					// Write the data to the map in the cluster.
-					err = r.CreateOrUpdate(clusterMap, instance, func() error {
+					err = r.CreateOrUpdate(logger, clusterMap, instance, func() error {
 						kappnavutils.CustomizeConfigMap(clusterMap, instance)
 						// Write the data section if it doesn't exist or is empty.
 						if clusterMap.Data == nil || len(clusterMap.Data) == 0 {
@@ -388,8 +495,10 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 						return nil
 					})
 					if err != nil {
-						reqLogger.Error(err, "Failed to reconcile the "+configMap.GetName()+" ConfigMap")
-						return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+						if logger.IsEnabled(kappnavutils.LogTypeError) {
+							logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the %s ConfigMap"+otherLogData+", Error: %s", configMap.GetName(), err), logName)
+						}
+						return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 					}
 				}
 			}
@@ -403,14 +512,19 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 	}
-	err = r.CreateOrUpdate(builtinConfig, instance, func() error {
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update builtin config"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, builtinConfig, instance, func() error {
 		kappnavutils.CustomizeConfigMap(builtinConfig, instance)
-		kappnavutils.CustomizeBuiltinConfigMap(builtinConfig, &r.ReconcilerBase, instance)
+		kappnavutils.CustomizeBuiltinConfigMap(logger, builtinConfig, &r.ReconcilerBase, instance)
 		return nil
 	})
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the kappnav-config ConfigMap")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the kappnav-config ConfigMap"+otherLogData+", Error: %s ", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// Create or update kappnav-config
@@ -420,14 +534,19 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 	}
-	err = r.CreateOrUpdate(kappnavConfig, instance, func() error {
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update kappnav-config"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, kappnavConfig, instance, func() error {
 		kappnavutils.CustomizeConfigMap(kappnavConfig, instance)
 		kappnavutils.CustomizeKappnavConfigMap(kappnavConfig, kappnavURL, instance)
 		return nil
 	})
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the kappnav-config ConfigMap")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the kappnav-config ConfigMap"+otherLogData+", Error: %s", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// Create or update the UI deployment
@@ -437,7 +556,10 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 	}
-	err = r.CreateOrUpdate(uiDeployment, instance, func() error {
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI deployment"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, uiDeployment, instance, func() error {
 		pts := &uiDeployment.Spec.Template
 		kappnavutils.CustomizeDeployment(uiDeployment, instance)
 		kappnavutils.CustomizePodSpec(pts, &uiDeployment.ObjectMeta,
@@ -446,8 +568,10 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		return nil
 	})
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the UI Deployment")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI Deployment"+otherLogData+", Error: %s ", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// Create or update the Controller deployment
@@ -457,7 +581,10 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 	}
-	err = r.CreateOrUpdate(controllerDeployment, instance, func() error {
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update controller deployment"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, controllerDeployment, instance, func() error {
 		pts := &controllerDeployment.Spec.Template
 		kappnavutils.CustomizeDeployment(controllerDeployment, instance)
 		kappnavutils.CustomizePodSpec(pts, &controllerDeployment.ObjectMeta,
@@ -465,8 +592,10 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		return nil
 	})
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the Controller Deployment")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the Controller Deployment"+otherLogData+", Error: %s", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// Apply defaults to the KindActionMapping (kam) instance
@@ -482,19 +611,53 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// Create or update the KindActionMapping (kam)
-	err = r.CreateOrUpdate(kamCR, instance, func() error {
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update KindActionMapping"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, kamCR, instance, func() error {
 		kappnavutils.CustomizeKAM(kamCR, default_kam, instance)
 		return nil
 	})
 
 	if err != nil {
-		reqLogger.Error(err, "Failed to reconcile the KindActionMapping")
-		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError,
+				fmt.Sprintf("Failed to reconcile the KindActionMapping"+otherLogData+", Error: %s", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
 	// If an extension exists call its reconcile function, otherwise return success.
 	if extension != nil {
-		return extension.ReconcileAdditionalResources(request, &r.ReconcilerBase, instance)
+		return extension.ReconcileAdditionalResources(logger, request, &r.ReconcilerBase, instance)
 	}
-	return r.ManageSuccess(kappnavv1.StatusConditionTypeReconciled, instance)
+	return r.ManageSuccess(logger, kappnavv1.StatusConditionTypeReconciled, instance)
+
+}
+
+// get logging info from CR and set logger level
+func setLoggingLevel(logger kappnavutils.Logger, loginfo string) {
+	switch loginfo {
+	case "info":
+		logger.SetLogLevel(kappnavutils.LogLevelInfo)
+		break
+	case "debug":
+		logger.SetLogLevel(kappnavutils.LogLevelDebug)
+		break
+	case "error":
+		logger.SetLogLevel(kappnavutils.LogLevelError)
+		break
+	case "warning":
+		logger.SetLogLevel(kappnavutils.LogLevelWarning)
+		break
+	case "entry":
+		logger.SetLogLevel(kappnavutils.LogLevelEntry)
+		break
+	case "all":
+		logger.SetLogLevel(kappnavutils.LogLevelAll)
+		break
+	case "none":
+		logger.SetLogLevel(kappnavutils.LogLevelNone)
+		break
+	}
 }

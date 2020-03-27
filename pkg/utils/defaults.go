@@ -31,6 +31,7 @@ func SetKappnavDefaults(instance *kappnavv1.Kappnav) error {
 	setExtensionContainerDefaults(instance, defaults)
 	setImageDefaults(instance, defaults)
 	setEnvironmentDefaults(instance, defaults)
+	setLoggingDefaults(instance, defaults)
 	return nil
 }
 
@@ -150,6 +151,25 @@ func setEnvironmentDefaults(instance *kappnavv1.Kappnav, defaults *kappnavv1.Kap
 	} else {
 		if len(env.KubeEnv) == 0 {
 			env.KubeEnv = defaults.Spec.Env.KubeEnv
+		}
+	}
+}
+
+// set default logging values
+func setLoggingDefaults(instance *kappnavv1.Kappnav, defaults *kappnavv1.Kappnav) {
+	logging := instance.Spec.Logging
+
+	if logging == nil {
+		instance.Spec.Logging = defaults.Spec.Logging
+	} else {		
+		defaultLogging := defaults.Spec.Logging		
+		for key, value := range logging {
+			// set default values when no logging values specified in kappnav instance
+			if len(key) != 0 && len(value) == 0 {
+				if defaultLogging != nil { 					
+					logging[key] = defaultLogging[key]											
+				}	      
+			}
 		}
 	}
 }

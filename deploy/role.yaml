@@ -73,3 +73,16 @@ rules:
   - '*'
   verbs:
   - '*'
+- apiGroups:
+  - actions.kappnav.io
+  resources:
+  - '*'
+  - kindactionmappings
+  verbs:
+  - '*'
+- apiGroups:
+  - kappnav.io
+  resources:
+  - '*'
+  verbs:
+  - '*'

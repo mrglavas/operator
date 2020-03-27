@@ -15,7 +15,8 @@ package utils
 
 import (
 	"strings"
-
+	
+	kamv1 "github.com/kappnav/operator/pkg/apis/actions/v1"
 	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
 	appv1beta1 "github.com/kubernetes-sigs/application/pkg/apis/app/v1beta1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -372,6 +373,12 @@ func CustomizeKappnavConfigMap(kappnavConfig *corev1.ConfigMap, kappnavURL strin
 			kappnavConfig.Data["kappnav-url"] = kappnavURL
 		}
 	}
+}
+
+// CustomizeKAM ...
+func CustomizeKAM(kam *kamv1.KindActionMapping, default_kam *kamv1.KindActionMapping, instance *kappnavv1.Kappnav) {
+	kam.Labels = GetLabels(instance, kam.Labels, &kam.ObjectMeta)
+	kam.Spec = default_kam.Spec
 }
 
 // CreateUIDeploymentContainers ...

@@ -53,8 +53,12 @@ COPY --from=builder /go/src/github.com/kappnav/operator/manager ${OPERATOR}
 
 # copying various resources into the image
 COPY deploy/default_values.yaml deploy/
+COPY deploy/default_kam.yaml deploy/
 COPY deploy/maps/ maps/
 COPY deploy/crds/extensions crds/
+
+# copying kindactionmappingresouces in deploy/crds/extension 
+COPY deploy/crds/actions_v1_kindactionmapping_crd.yaml crds/
 
 # get application CRD from Kubernetes Application SIG
 RUN curl -fsSLO --compressed   https://raw.githubusercontent.com/kubernetes-sigs/application/v0.8.0/config/crds/app_v1beta1_application.yaml \

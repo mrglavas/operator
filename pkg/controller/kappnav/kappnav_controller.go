@@ -21,6 +21,7 @@ import (
 	"strings"
 	"text/template"
 
+	kamv1 "github.com/kappnav/operator/pkg/apis/actions/v1"
 	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
 	kappnavutils "github.com/kappnav/operator/pkg/utils"
 	appv1beta1 "github.com/kubernetes-sigs/application/pkg/apis/app/v1beta1"
@@ -112,8 +113,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for changes to secondary resources that are always created by the operator
 	// (such as Deployment, ConfigMap, Service, etc...) and requeue the owner Kappnav
-	types := []runtime.Object{&appsv1.Deployment{}, &corev1.ConfigMap{}, &corev1.Secret{},
-		&corev1.Service{}, &corev1.ServiceAccount{}, &rbacv1.ClusterRoleBinding{}, &appv1beta1.Application{}}
+	types := []runtime.Object{&appsv1.Deployment{},
+		&corev1.ConfigMap{},
+		&corev1.Secret{},
+		&corev1.Service{},
+		&corev1.ServiceAccount{},
+		&rbacv1.ClusterRoleBinding{},
+		&appv1beta1.Application{},
+		&kamv1.KindActionMapping{}}
 	for i := range types {
 		err = c.Watch(&source.Kind{Type: types[i]}, &handler.EnqueueRequestForOwner{
 			IsController: true,
@@ -459,6 +466,29 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	})
 	if err != nil {
 		reqLogger.Error(err, "Failed to reconcile the Controller Deployment")
+		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
+	}
+
+	// Apply defaults to the KindActionMapping (kam) instance
+	default_kam := &kamv1.KindActionMapping{}
+	err = kappnavutils.SetKAMDefaults(default_kam)
+
+	// Set ObjectMeta of KindActionMapping
+	kamCR := &kamv1.KindActionMapping{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "default",
+			Namespace: instance.GetNamespace(),
+		},
+	}
+
+	// Create or update the KindActionMapping (kam)
+	err = r.CreateOrUpdate(kamCR, instance, func() error {
+		kappnavutils.CustomizeKAM(kamCR, default_kam, instance)
+		return nil
+	})
+
+	if err != nil {
+		reqLogger.Error(err, "Failed to reconcile the KindActionMapping")
 		return r.ManageError(err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 

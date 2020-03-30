@@ -548,31 +548,6 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}
 
-	// Create or update the UI deployment
-	uiDeployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.GetName() + "-ui",
-			Namespace: instance.GetNamespace(),
-		},
-	}
-	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
-		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI deployment"+otherLogData, logName)
-	}
-	err = r.CreateOrUpdate(logger, uiDeployment, instance, func() error {
-		pts := &uiDeployment.Spec.Template
-		kappnavutils.CustomizeDeployment(uiDeployment, instance)
-		kappnavutils.CustomizePodSpec(pts, &uiDeployment.ObjectMeta,
-			kappnavutils.CreateUIDeploymentContainers(pts.Spec.Containers, instance),
-			kappnavutils.CreateUIVolumes(instance), instance)
-		return nil
-	})
-	if err != nil {
-		if logger.IsEnabled(kappnavutils.LogTypeError) {
-			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI Deployment"+otherLogData+", Error: %s ", err), logName)
-		}
-		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
-	}
-
 	// Apply defaults to the KindActionMapping (kam) instance
 	default_kam := &kamv1.KindActionMapping{}
 	err = kappnavutils.SetKAMDefaults(default_kam)
@@ -598,6 +573,31 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 	if err != nil {
 		if logger.IsEnabled(kappnavutils.LogTypeError) {
 			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the KindActionMapping"+otherLogData+", Error: %s", err), logName)
+		}
+		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
+	}
+
+	// Create or update the UI deployment
+	uiDeployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.GetName() + "-ui",
+			Namespace: instance.GetNamespace(),
+		},
+	}
+	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update UI deployment"+otherLogData, logName)
+	}
+	err = r.CreateOrUpdate(logger, uiDeployment, instance, func() error {
+		pts := &uiDeployment.Spec.Template
+		kappnavutils.CustomizeDeployment(uiDeployment, instance)
+		kappnavutils.CustomizePodSpec(pts, &uiDeployment.ObjectMeta,
+			kappnavutils.CreateUIDeploymentContainers(pts.Spec.Containers, instance),
+			kappnavutils.CreateUIVolumes(instance), instance)
+		return nil
+	})
+	if err != nil {
+		if logger.IsEnabled(kappnavutils.LogTypeError) {
+			logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeError, fmt.Sprintf("Failed to reconcile the UI Deployment"+otherLogData+", Error: %s ", err), logName)
 		}
 		return r.ManageError(logger, err, kappnavv1.StatusConditionTypeReconciled, instance)
 	}

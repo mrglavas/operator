@@ -38,6 +38,8 @@ spec:
                     type: string
                   mapname:
                     type: string
+                  name:
+                    type: string
                   subkind:
                     type: string
                 type: object

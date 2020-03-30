@@ -56,6 +56,10 @@ COPY deploy/default_values.yaml deploy/
 COPY deploy/maps/ maps/
 COPY deploy/crds/extensions crds/
 
+# copying kindactionmappingresouces into the image
+COPY deploy/crds/actions_v1_kindactionmapping_crd.yaml crds/
+COPY deploy/default_kam.yaml deploy/
+
 # get application CRD from Kubernetes Application SIG
 RUN curl -fsSLO --compressed   https://raw.githubusercontent.com/kubernetes-sigs/application/v0.8.0/config/crds/app_v1beta1_application.yaml \
     && mv app_v1beta1_application.yaml crds/

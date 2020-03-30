@@ -1,0 +1,6 @@
+apiVersion: actions.kappnav.io/v1
+kind: KindActionMapping
+metadata:
+  name: example-kindactionmapping
+spec:
+  # Add fields here

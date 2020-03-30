@@ -14,17 +14,18 @@ limitations under the License.
 package utils
 
 import (
-	"strings"
-	"runtime"
-	"path/filepath"
-	"strconv"
 	"fmt"
+	"path/filepath"
+	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
-	"github.com/pkg/errors"
+	kamv1 "github.com/kappnav/operator/pkg/apis/actions/v1"
 	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
 	appv1beta1 "github.com/kubernetes-sigs/application/pkg/apis/app/v1beta1"
 	routev1 "github.com/openshift/api/route/v1"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
@@ -380,6 +381,12 @@ func CustomizeKappnavConfigMap(kappnavConfig *corev1.ConfigMap, kappnavURL strin
 	}
 }
 
+// CustomizeKAM ...
+func CustomizeKAM(kam *kamv1.KindActionMapping, default_kam *kamv1.KindActionMapping, instance *kappnavv1.Kappnav) {
+	kam.Labels = GetLabels(instance, kam.Labels, &kam.ObjectMeta)
+	kam.Spec = default_kam.Spec
+}
+
 // CreateUIDeploymentContainers ...
 func CreateUIDeploymentContainers(existingContainers []corev1.Container, instance *kappnavv1.Kappnav) []corev1.Container {
 	// Extract environment variables from existing containers.
@@ -659,7 +666,6 @@ func setPodSecurity(pts *corev1.PodTemplateSpec) {
 	}
 }
 
-
 // IsMinikubeEnv ...
 func IsMinikubeEnv(kubeEnv string) bool {
 	return kubeEnv == "minikube" || kubeEnv == "k8s"
@@ -688,7 +694,7 @@ type OCPClusterInfo struct {
 func getOCPClusterInfo(logger Logger, r *ReconcilerBase) *OCPClusterInfo {
 	config, err := r.GetOperatorConfigMap(logger, "console-config", "openshift-console")
 	if err != nil {
-		if (logger.IsEnabled(LogTypeError)) {
+		if logger.IsEnabled(LogTypeError) {
 			logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not retrieve console-config ConfigMap for OCP, Error: %s ", err), logName)
 		}
 		return nil
@@ -699,7 +705,7 @@ func getOCPClusterInfo(logger Logger, r *ReconcilerBase) *OCPClusterInfo {
 			consoleConfig := &OCPConsoleConfig{}
 			err = yaml.Unmarshal([]byte(value), consoleConfig)
 			if err != nil {
-				if (logger.IsEnabled(LogTypeError)) {
+				if logger.IsEnabled(LogTypeError) {
 					logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not parse console-config.yaml, Error: %s ", err), logName)
 				}
 				return nil
@@ -713,7 +719,7 @@ func getOCPClusterInfo(logger Logger, r *ReconcilerBase) *OCPClusterInfo {
 			return &consoleConfig.ClusterInfo
 		}
 	}
-	if (logger.IsEnabled(LogTypeInfo)) {
+	if logger.IsEnabled(LogTypeInfo) {
 		logger.Log(CallerName(), LogTypeInfo, "Could not retrieve cluster info from console-config for OCP.", logName)
 	}
 	return nil
@@ -730,10 +736,10 @@ type OKDClusterInfo struct {
 	AdminConsolePublicURL string `yaml:"adminConsolePublicURL,omitempty"`
 }
 
-func getOKDClusterInfo(logger Logger, r *ReconcilerBase) *OKDClusterInfo {	
+func getOKDClusterInfo(logger Logger, r *ReconcilerBase) *OKDClusterInfo {
 	config, err := r.GetOperatorConfigMap(logger, "webconsole-config", "openshift-web-console")
 	if err != nil {
-		if (logger.IsEnabled(LogTypeError)) {
+		if logger.IsEnabled(LogTypeError) {
 			logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not retrieve webconsole-config ConfigMap for OKD, Error: %s ", err), logName)
 		}
 		return nil
@@ -744,7 +750,7 @@ func getOKDClusterInfo(logger Logger, r *ReconcilerBase) *OKDClusterInfo {
 			consoleConfig := &OKDConsoleConfig{}
 			err = yaml.Unmarshal([]byte(value), consoleConfig)
 			if err != nil {
-				if (logger.IsEnabled(LogTypeError)) {
+				if logger.IsEnabled(LogTypeError) {
 					logger.Log(CallerName(), LogTypeError, fmt.Sprintf("Could not parse webconsole-config.yaml, Error: %s ", err), logName)
 				}
 				return nil
@@ -764,7 +770,7 @@ func getOKDClusterInfo(logger Logger, r *ReconcilerBase) *OKDClusterInfo {
 			return &consoleConfig.ClusterInfo
 		}
 	}
-	if (logger.IsEnabled(LogTypeInfo)) {
+	if logger.IsEnabled(LogTypeInfo) {
 		logger.Log(CallerName(), LogTypeInfo, "Could not retrieve cluster info from webconsole-config for OKD.", logName)
 	}
 	return nil
@@ -795,25 +801,24 @@ func SetCondition(condition kappnavv1.StatusCondition, status *kappnavv1.Kappnav
 	status.Conditions = append(status.Conditions, condition)
 }
 
-
 // CallerName get the caller program file name, line number and function name in "fileName:line# funcName"
-func CallerName() string {	
+func CallerName() string {
 	var callerName string
-	pc, fileName, line, _ := runtime.Caller(1)	
+	pc, fileName, line, _ := runtime.Caller(1)
 
 	// get function name
-    funcNameFull := runtime.FuncForPC(pc).Name()    
-	funcNameEnd := filepath.Ext(funcNameFull)           
-	funcName := strings.TrimPrefix(funcNameEnd, ".") 
-	
+	funcNameFull := runtime.FuncForPC(pc).Name()
+	funcNameEnd := filepath.Ext(funcNameFull)
+	funcName := strings.TrimPrefix(funcNameEnd, ".")
+
 	// get file name
 	suffix := ".go"
 	_, nf := filepath.Split(fileName)
 	if strings.HasSuffix(nf, ".go") {
 		fileName = strings.TrimSuffix(nf, suffix)
-		callerName = fileName + suffix + ":" + strconv.Itoa(line)+ " " + funcName
-	}	
-    return callerName  
+		callerName = fileName + suffix + ":" + strconv.Itoa(line) + " " + funcName
+	}
+	return callerName
 }
 
 //ErrorWithStack print stack trace for error message
@@ -824,8 +829,8 @@ func ErrorWithStack(msg string) string {
 	return s
 }
 
-//FormatTimeStamp format with unix seconds in float 
-func FormatTimestamp(t time.Time) float64 {	
+//FormatTimeStamp format with unix seconds in float
+func FormatTimestamp(t time.Time) float64 {
 	s := fmt.Sprintf("%10.7f", float64(t.UnixNano())/1e9)
 	ts, _ := strconv.ParseFloat(s, 64)
 	return ts
@@ -840,4 +845,3 @@ func contains(arr []string, corev1.LocalObjectReference) bool {
 	}
 	return false
  } */
-

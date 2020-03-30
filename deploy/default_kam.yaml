@@ -1,0 +1,47 @@
+apiVersion: actions.kappnav.io/v1
+kind: KindActionMapping
+metadata:
+  name: default
+  namespace: kappnav
+spec:
+   precedence: 1 
+   mappings:
+   - apiVersion: '*/*'
+     name: '*' 
+     subkind: '*' 
+     kind: '*'
+     mapname: ${namespace}.actions.${kind}-${subkind}.${name} 
+         
+   - apiVersion: '*/*'
+     subkind: '*' 
+     kind: '*'
+     mapname: kappnav.actions.${kind}-${subkind} 
+
+   - apiVersion: '*/*'
+     name: '*' 
+     kind: '*'
+     mapname: ${namespace}.actions.${kind}.${name}   
+
+   - apiVersion: '*/*'
+     kind: '*'
+     mapname: kappnav.actions.${kind}
+     
+   - apiVersion: '*'
+     name: '*' 
+     subkind: '*' 
+     kind: '*'
+     mapname: ${namespace}.actions.${kind}-${subkind}.${name} 
+          
+   - apiVersion: '*'
+     subkind: '*' 
+     kind: '*'
+     mapname: kappnav.actions.${kind}-${subkind} 
+
+   - apiVersion: '*'
+     name: '*' 
+     kind: '*'
+     mapname: ${namespace}.actions.${kind}.${name}   
+
+   - apiVersion: '*'
+     kind: '*'
+     mapname: kappnav.actions.${kind}

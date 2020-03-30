@@ -14,8 +14,10 @@ limitations under the License.
 package utils
 
 import (
-	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
 	"io/ioutil"
+
+	kamv1 "github.com/kappnav/operator/pkg/apis/actions/v1"
+	kappnavv1 "github.com/kappnav/operator/pkg/apis/kappnav/v1"
 	"sigs.k8s.io/yaml"
 )
 
@@ -155,20 +157,47 @@ func setEnvironmentDefaults(instance *kappnavv1.Kappnav, defaults *kappnavv1.Kap
 	}
 }
 
+// SetKAMDefaults sets default kam values on the CR instance
+func SetKAMDefaults(instance_kam *kamv1.KindActionMapping) error {
+	err := getKAMDefaults(instance_kam)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getKAMDefaults(instance_kam *kamv1.KindActionMapping) error {
+	// Read default kam values file
+	fData, err := ioutil.ReadFile("deploy/default_kam.yaml")
+	if err != nil {
+		return err
+	}
+	defaults := &kamv1.KindActionMapping{}
+
+	err = yaml.Unmarshal(fData, defaults)
+	if err != nil {
+		return err
+	}
+
+	instance_kam.Spec = defaults.Spec
+	instance_kam.Status = defaults.Status
+	return nil
+}
+
 // set default logging values
 func setLoggingDefaults(instance *kappnavv1.Kappnav, defaults *kappnavv1.Kappnav) {
 	logging := instance.Spec.Logging
 
 	if logging == nil {
 		instance.Spec.Logging = defaults.Spec.Logging
-	} else {		
-		defaultLogging := defaults.Spec.Logging		
+	} else {
+		defaultLogging := defaults.Spec.Logging
 		for key, value := range logging {
 			// set default values when no logging values specified in kappnav instance
 			if len(key) != 0 && len(value) == 0 {
-				if defaultLogging != nil { 					
-					logging[key] = defaultLogging[key]											
-				}	      
+				if defaultLogging != nil {
+					logging[key] = defaultLogging[key]
+				}
 			}
 		}
 	}

@@ -22,6 +22,7 @@ type MappingConfiguration struct {
 	ApiVersion string `json:"apiVersion,omitempty"`
 	Kind       string `json:"kind,omitempty"`
 	Subkind    string `json:"subkind,omitempty"`
+	Name       string `json:"name,omitempty"`
 	Mapname    string `json:"mapname,omitempty"`
 }
 

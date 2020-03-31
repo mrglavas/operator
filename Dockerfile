@@ -56,7 +56,7 @@ COPY deploy/default_values.yaml deploy/
 COPY deploy/maps/ maps/
 COPY deploy/crds/extensions crds/
 
-# copying kindactionmappingresouces into the image
+# copying kindactionmapping resouces into the image
 COPY deploy/crds/actions_v1_kindactionmapping_crd.yaml crds/
 COPY deploy/default_kam.yaml deploy/
 

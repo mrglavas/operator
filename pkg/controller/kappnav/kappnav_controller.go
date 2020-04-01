@@ -486,7 +486,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 					}
 					// Write the data to the map in the cluster.
 					err = r.CreateOrUpdate(logger, clusterMap, instance, func() error {
-						kappnavutils.CustomizeConfigMap(clusterMap, instance)
+						kappnavutils.CustomizeConfigMap(clusterMap, instance, dir)
 						// Write the data section if it doesn't exist or is empty.
 						if clusterMap.Data == nil || len(clusterMap.Data) == 0 {
 							clusterMap.Data = configMap.Data
@@ -515,7 +515,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update builtin config"+otherLogData, logName)
 	}
 	err = r.CreateOrUpdate(logger, builtinConfig, instance, func() error {
-		kappnavutils.CustomizeConfigMap(builtinConfig, instance)
+		kappnavutils.CustomizeConfigMap(builtinConfig, instance, "builtin")
 		kappnavutils.CustomizeBuiltinConfigMap(logger, builtinConfig, &r.ReconcilerBase, instance)
 		return nil
 	})
@@ -537,7 +537,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update kappnav-config"+otherLogData, logName)
 	}
 	err = r.CreateOrUpdate(logger, kappnavConfig, instance, func() error {
-		kappnavutils.CustomizeConfigMap(kappnavConfig, instance)
+		kappnavutils.CustomizeConfigMap(kappnavConfig, instance, "kappnav-config")
 		kappnavutils.CustomizeKappnavConfigMap(kappnavConfig, kappnavURL, instance)
 		return nil
 	})

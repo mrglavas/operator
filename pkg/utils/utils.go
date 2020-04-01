@@ -68,12 +68,23 @@ const (
 
 // GetLabels ...
 func GetLabels(instance *kappnavv1.Kappnav,
-	existingLabels map[string]string, component *metav1.ObjectMeta) map[string]string {
-	labels := map[string]string{
-		"app.kubernetes.io/name":       instance.Name,
-		"app.kubernetes.io/instance":   instance.Name,
-		"app.kubernetes.io/managed-by": "kappnav-operator",
+	existingLabels map[string]string, component *metav1.ObjectMeta, mapType string) map[string]string {
+	labels := make(map[string]string)
+	labels["app.kubernetes.io/name"] = instance.Name
+	labels["app.kubernetes.io/instance"] = instance.Name
+	labels["app.kubernetes.io/managed-by"] = "kappnav-operator"
+	if existingLabels["kappnav.io/map-type"] == ""  {
+		if strings.HasSuffix(mapType, "action") {
+			labels["kappnav.io/map-type"] = "action"
+		} else if strings.HasSuffix(mapType, "status") {
+			labels["kappnav.io/map-type"] = "status"
+		} else if strings.HasSuffix(mapType, "sections") {
+			labels["kappnav.io/map-type"] = "sections"
+		} else if strings.HasSuffix(mapType, "builtin"){
+			labels["kappnav.io/map-type"] = "builtin"
+		}
 	}
+		
 	if component != nil && len(component.Name) > 0 {
 		labels["app.kubernetes.io/component"] = component.GetName()
 	}
@@ -98,7 +109,7 @@ func GetLabels(instance *kappnavv1.Kappnav,
 
 // CustomizeServiceAccount ...
 func CustomizeServiceAccount(logger Logger, sa *corev1.ServiceAccount, uiService *metav1.ObjectMeta, instance *kappnavv1.Kappnav) {
-	sa.Labels = GetLabels(instance, sa.Labels, &sa.ObjectMeta)
+	sa.Labels = GetLabels(instance, sa.Labels, &sa.ObjectMeta, "")
 	if sa.Annotations == nil {
 		sa.Annotations = make(map[string]string)
 	}
@@ -123,7 +134,7 @@ func CustomizeServiceAccount(logger Logger, sa *corev1.ServiceAccount, uiService
 // CustomizeClusterRoleBinding ...
 func CustomizeClusterRoleBinding(crb *rbacv1.ClusterRoleBinding,
 	sa *corev1.ServiceAccount, instance *kappnavv1.Kappnav) {
-	crb.Labels = GetLabels(instance, crb.Labels, &crb.ObjectMeta)
+	crb.Labels = GetLabels(instance, crb.Labels, &crb.ObjectMeta, "")
 	crb.Subjects = []rbacv1.Subject{
 		{
 			Kind:      "ServiceAccount",
@@ -139,18 +150,18 @@ func CustomizeClusterRoleBinding(crb *rbacv1.ClusterRoleBinding,
 }
 
 // CustomizeConfigMap ...
-func CustomizeConfigMap(configMap *corev1.ConfigMap, instance *kappnavv1.Kappnav) {
-	configMap.Labels = GetLabels(instance, configMap.Labels, &configMap.ObjectMeta)
+func CustomizeConfigMap(configMap *corev1.ConfigMap, instance *kappnavv1.Kappnav, mapType string) {
+	configMap.Labels = GetLabels(instance, configMap.Labels, &configMap.ObjectMeta, mapType)
 }
 
 // CustomizeSecret ...
 func CustomizeSecret(secret *corev1.Secret, instance *kappnavv1.Kappnav) {
-	secret.Labels = GetLabels(instance, secret.Labels, &secret.ObjectMeta)
+	secret.Labels = GetLabels(instance, secret.Labels, &secret.ObjectMeta, "")
 }
 
 // CustomizeApplication ...
 func CustomizeApplication(app *appv1beta1.Application, instance *kappnavv1.Kappnav, annotations map[string]string) {
-	app.Labels = GetLabels(instance, app.Labels, &app.ObjectMeta)
+	app.Labels = GetLabels(instance, app.Labels, &app.ObjectMeta, "")
 	if app.Annotations == nil {
 		app.Annotations = annotations
 	} else {
@@ -163,7 +174,7 @@ func CustomizeApplication(app *appv1beta1.Application, instance *kappnavv1.Kappn
 
 // CustomizeService ...
 func CustomizeService(service *corev1.Service, instance *kappnavv1.Kappnav, annotations map[string]string) {
-	service.Labels = GetLabels(instance, service.Labels, &service.ObjectMeta)
+	service.Labels = GetLabels(instance, service.Labels, &service.ObjectMeta, "")
 	if service.Annotations == nil {
 		service.Annotations = annotations
 	} else {
@@ -213,7 +224,7 @@ func CustomizeUIServiceSpec(serviceSpec *corev1.ServiceSpec, instance *kappnavv1
 
 // CustomizeIngress ...
 func CustomizeIngress(ingress *extensionsv1beta1.Ingress, instance *kappnavv1.Kappnav) {
-	ingress.Labels = GetLabels(instance, ingress.Labels, &ingress.ObjectMeta)
+	ingress.Labels = GetLabels(instance, ingress.Labels, &ingress.ObjectMeta, "")
 }
 
 // CustomizeUIIngressSpec ...
@@ -249,7 +260,7 @@ func CustomizeUIIngressSpec(ingressSpec *extensionsv1beta1.IngressSpec,
 
 // CustomizeRoute ...
 func CustomizeRoute(route *routev1.Route, instance *kappnavv1.Kappnav) {
-	route.Labels = GetLabels(instance, route.Labels, &route.ObjectMeta)
+	route.Labels = GetLabels(instance, route.Labels, &route.ObjectMeta, "")
 }
 
 // CustomizeUIRouteSpec ...
@@ -265,7 +276,7 @@ func CustomizeUIRouteSpec(routeSpec *routev1.RouteSpec,
 
 // CustomizeDeployment ...
 func CustomizeDeployment(deploy *appsv1.Deployment, instance *kappnavv1.Kappnav) {
-	deploy.Labels = GetLabels(instance, deploy.Labels, &deploy.ObjectMeta)
+	deploy.Labels = GetLabels(instance, deploy.Labels, &deploy.ObjectMeta, "")
 	// Ensure that there's at least one replica
 	if deploy.Spec.Replicas == nil || *deploy.Spec.Replicas < 1 {
 		one := int32(1)
@@ -281,7 +292,7 @@ func CustomizeDeployment(deploy *appsv1.Deployment, instance *kappnavv1.Kappnav)
 // CustomizePodSpec ...
 func CustomizePodSpec(pts *corev1.PodTemplateSpec, parentComponent *metav1.ObjectMeta,
 	containers []corev1.Container, volumes []corev1.Volume, instance *kappnavv1.Kappnav) {
-	pts.Labels = GetLabels(instance, pts.Labels, parentComponent)
+	pts.Labels = GetLabels(instance, pts.Labels, parentComponent, "")
 	pts.Spec.Containers = containers
 	pts.Spec.RestartPolicy = corev1.RestartPolicyAlways
 	pts.Spec.ServiceAccountName = instance.GetName() + "-" + ServiceAccountNameSuffix
@@ -383,7 +394,7 @@ func CustomizeKappnavConfigMap(kappnavConfig *corev1.ConfigMap, kappnavURL strin
 
 // CustomizeKAM ...
 func CustomizeKAM(kam *kamv1.KindActionMapping, default_kam *kamv1.KindActionMapping, instance *kappnavv1.Kappnav) {
-	kam.Labels = GetLabels(instance, kam.Labels, &kam.ObjectMeta)
+	kam.Labels = GetLabels(instance, kam.Labels, &kam.ObjectMeta, "")
 	kam.Spec = default_kam.Spec
 }
 

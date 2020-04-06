@@ -537,7 +537,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Create or update kappnav-config"+otherLogData, logName)
 	}
 	err = r.CreateOrUpdate(logger, kappnavConfig, instance, func() error {
-		kappnavutils.CustomizeConfigMap(kappnavConfig, instance, "kappnav-config")
+		kappnavutils.CustomizeConfigMap(kappnavConfig, instance, "builtin")
 		kappnavutils.CustomizeKappnavConfigMap(kappnavConfig, kappnavURL, instance)
 		return nil
 	})

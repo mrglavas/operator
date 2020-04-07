@@ -226,7 +226,7 @@ func (r *ReconcileKappnav) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Retrieve logging info from kappnav CR and update the kappnavutils level
 	if logger.IsEnabled(kappnavutils.LogTypeInfo) {
-		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Retrieve kappnavutils info from kappnav CR"+otherLogData, logName)
+		logger.Log(kappnavutils.CallerName(), kappnavutils.LogTypeInfo, "Retrieve logging info from kappnav CR"+otherLogData, logName)
 	}
 	loggingMap := instance.Spec.Logging
 	if len(loggingMap["operator"]) > 0 {

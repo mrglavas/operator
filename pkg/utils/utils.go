@@ -115,20 +115,19 @@ func CustomizeServiceAccount(logger Logger, sa *corev1.ServiceAccount, uiService
 	}
 	// Adding the OAuth proxy to the service account.
 	sa.Annotations[OAuthRedirectAnnotationName] = "{\"kind\":\"OAuthRedirectReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"Route\",\"name\":\"" + uiService.GetName() + "\"}}"
-	// Adding pull secrets to the service account.
-	imagePullSecrets := make([]corev1.LocalObjectReference, 1)
-	imagePullSecrets[0] = corev1.LocalObjectReference{
-		Name: "sa-" + sa.GetNamespace(),
-	}
+	
+	// Retrieving pull secrets from kappnav CR and adding them to the service account.
 	pullSecrets := instance.Spec.Image.PullSecrets
 	if pullSecrets != nil && len(pullSecrets) != 0 {
 		for _, secretName := range pullSecrets {
-			imagePullSecrets = append(imagePullSecrets, corev1.LocalObjectReference{
-				Name: secretName,
-			})
+			//if secret does not exist in sa.ImagePullSecrets, append it to sa.ImagePullSecrets
+			if !containSecret(sa.ImagePullSecrets, secretName) {
+				sa.ImagePullSecrets = append(sa.ImagePullSecrets, corev1.LocalObjectReference{
+					Name: secretName,
+				})
+			}
 		}
 	}
-	sa.ImagePullSecrets = imagePullSecrets
 }
 
 // CustomizeClusterRoleBinding ...
@@ -188,15 +187,10 @@ func CustomizeService(service *corev1.Service, instance *kappnavv1.Kappnav, anno
 // CustomizeUIServiceSpec ...
 func CustomizeUIServiceSpec(serviceSpec *corev1.ServiceSpec, instance *kappnavv1.Kappnav) {
 	isMinikube := IsMinikubeEnv(instance.Spec.Env.KubeEnv)
-	oldType := serviceSpec.Type
 	if isMinikube {
 		serviceSpec.Type = corev1.ServiceTypeNodePort
-	} else {
-		serviceSpec.Type = ""
-	}
-	if oldType != serviceSpec.Type {
-		serviceSpec.Ports = nil
-	}
+	} 
+
 	if serviceSpec.Ports == nil || len(serviceSpec.Ports) == 0 {
 		if isMinikube {
 			serviceSpec.Ports = []corev1.ServicePort{
@@ -276,22 +270,22 @@ func CustomizeUIRouteSpec(routeSpec *routev1.RouteSpec,
 
 // CustomizeDeployment ...
 func CustomizeDeployment(deploy *appsv1.Deployment, instance *kappnavv1.Kappnav) {
-	deploy.Labels = GetLabels(instance, deploy.Labels, &deploy.ObjectMeta, "")
+	deploy.Labels = GetLabels(instance, deploy.Labels, &deploy.ObjectMeta, "")	
 	// Ensure that there's at least one replica
 	if deploy.Spec.Replicas == nil || *deploy.Spec.Replicas < 1 {
 		one := int32(1)
 		deploy.Spec.Replicas = &one
-	}
+	}	
 	deploy.Spec.Selector = &metav1.LabelSelector{
 		MatchLabels: map[string]string{
 			"app.kubernetes.io/component": deploy.GetName(),
 		},
-	}
+	}	
 }
 
 // CustomizePodSpec ...
 func CustomizePodSpec(pts *corev1.PodTemplateSpec, parentComponent *metav1.ObjectMeta,
-	containers []corev1.Container, volumes []corev1.Volume, instance *kappnavv1.Kappnav) {
+	containers []corev1.Container, volumes []corev1.Volume, instance *kappnavv1.Kappnav) {	
 	pts.Labels = GetLabels(instance, pts.Labels, parentComponent, "")
 	pts.Spec.Containers = containers
 	pts.Spec.RestartPolicy = corev1.RestartPolicyAlways
@@ -847,12 +841,15 @@ func FormatTimestamp(t time.Time) float64 {
 	return ts
 }
 
-/*
-func contains(arr []string, corev1.LocalObjectReference) bool {
-	for _, a := range arr {
-	   if a == str {
-		  return true
-	   }
+//containsSecret check if sa.ImagePullSecrets contains secret added in kappnav CR
+func containSecret(array []corev1.LocalObjectReference, secretName string) bool {
+	if array != nil {
+		for _, a := range array {
+			if a.Name == secretName {
+				return true
+			}
+		}
 	}
 	return false
- } */
+}
+

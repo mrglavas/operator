@@ -169,8 +169,8 @@ func (logger *loggerImpl) getLogMessage(logType LogType, logData string) string 
 /*setLogTypes set log types */
 func (logger *loggerImpl) setLogTypes(value bool) {
         for index, t := range logTypes {
-                if (logger.IsEnabled(LogTypeInfo)) {
-                        logger.Log(CallerName(), LogTypeInfo, fmt.Sprintf("Set log type %s to %t", t, value), "utils")
+                if (logger.IsEnabled(LogTypeDebug)) {
+                        logger.Log(CallerName(), LogTypeDebug, fmt.Sprintf("Set log type %s to %t", t, value), "utils")
                 }
                 logger.LogTypeEnabled[index] = value
         }    

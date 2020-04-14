@@ -152,10 +152,14 @@ spec:
     controller: info
 
   ###############################################################################
-  ## kAppNav Inventory variables - this must be last in file 
+  ## Extension containers - this must be last section in this file 
   ###############################################################################
 
   extensionContainers: 
+
+  ###############################################################################
+  ## kAppNav inventory variables 
+  ###############################################################################
     appNavInv: 
       repository: kappnav/inv
       tag: KAPPNAV_VERSION

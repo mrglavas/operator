@@ -43,7 +43,7 @@ COPY deploy/maps/ maps/
 COPY deploy/crds/extensions crds/
 
 # get application CRD from Kubernetes Application SIG
-RUN curl -fsSLO --compressed https://raw.githubusercontent.com/kubernetes-sigs/application/v0.8.1/config/crd/bases/app.k8s.io_applications.yaml \
+RUN curl -fsSLO --compressed https://raw.githubusercontent.com/kubernetes-sigs/application/v0.8.2/config/crd/bases/app.k8s.io_applications.yaml \
     && mv app.k8s.io_applications.yaml crds/
 
 # copy license files into the image

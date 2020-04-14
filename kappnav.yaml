@@ -138,7 +138,21 @@ spec:
     tag: KAPPNAV_VERSION
 
   ###############################################################################
-  ## kAppNav Inventory variables
+  ## Environmental variables
+  ###############################################################################
+  env:
+    kubeEnv: okd
+
+  ###############################################################################
+  ## Logging settings: none, warning, error, info, debug, entry, all
+  ###############################################################################
+  logging:
+    apis: info
+    operator: info
+    controller: info
+
+  ###############################################################################
+  ## kAppNav Inventory variables - this must be last in file 
   ###############################################################################
 
   extensionContainers: 
@@ -146,13 +160,3 @@ spec:
       repository: kappnav/inv
       tag: KAPPNAV_VERSION
 
-  ###############################################################################
-  ## Environmental variables
-  ###############################################################################
-  env:
-    kubeEnv: okd
-
-  logging:
-    apis: info
-    operator: info
-    controller: info

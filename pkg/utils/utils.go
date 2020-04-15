@@ -546,7 +546,8 @@ func createAPIReadinessProbe() *corev1.Probe {
 				Port:   intstr.FromInt(9443),
 			},
 		},
-		InitialDelaySeconds: 60,
+		InitialDelaySeconds: 90,   
+		TimeoutSeconds:      5, 
 		PeriodSeconds:       15,
 		FailureThreshold:    6,
 	}

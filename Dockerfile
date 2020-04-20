@@ -1,5 +1,5 @@
 ###########################################################################
-# Copyright 2019 IBM Corporation
+# Copyright 2019, 2020 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,12 +35,14 @@ FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
 
 ARG VERSION
 ARG BUILD_DATE
+ARG COMMIT
 
 LABEL name="Application Navigator" \
       vendor="kAppNav" \
       version=$VERSION \
       release=$VERSION \
       created=$BUILD_DATE \
+      commit=$COMMIT \
       summary="Operator image for Application Navigator" \
       description="This image contains the operator for Application Navigator"
 

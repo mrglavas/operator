@@ -150,6 +150,7 @@ spec:
     apis: info
     operator: info
     controller: info
+    ui: info
 
   ###############################################################################
   ## Extension containers - this must be last section in this file 

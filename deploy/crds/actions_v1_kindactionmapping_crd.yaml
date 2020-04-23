@@ -9,6 +9,9 @@ spec:
     listKind: KindActionMappingList
     plural: kindactionmappings
     singular: kindactionmapping
+    shortNames:
+    - kam
+    - kams
   scope: Namespaced
   subresources:
     status: {}
@@ -33,6 +36,12 @@ spec:
               items:
                 properties:
                   apiVersion:
+                    type: string
+                  owner:
+                    type: string
+                  ownerUID:
+                    type: string
+                  ownerAPI: 
                     type: string
                   kind:
                     type: string

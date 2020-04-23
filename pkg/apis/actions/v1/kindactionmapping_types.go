@@ -17,9 +17,12 @@ type KindActionMappingSpec struct {
 	Mappings   []MappingConfiguration `json:"mappings,omitempty"`
 }
 
-// MappingsConfigurtion defines resource constraints for Mapping configuration
+// MappingConfiguration defines resource constraints for Mapping configuration
 type MappingConfiguration struct {
-	ApiVersion string `json:"apiVersion,omitempty"`
+	APIVersion string `json:"apiVersion,omitempty"`
+	Owner      string `json:"owner,omitempty"`
+	OwnerUID   string `json:"ownerUID,omitempty"`
+	OwnerAPI   string `json:"ownerAPI,omitempty"`
 	Kind       string `json:"kind,omitempty"`
 	Subkind    string `json:"subkind,omitempty"`
 	Name       string `json:"name,omitempty"`

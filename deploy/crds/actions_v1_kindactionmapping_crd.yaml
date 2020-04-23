@@ -41,6 +41,8 @@ spec:
                     type: string
                   ownerUID:
                     type: string
+                  ownerAPI: 
+                    type: string
                   kind:
                     type: string
                   mapname:

@@ -25,24 +25,24 @@ spec:
   ###############################################################################
 
   appNavAPI:
-    repository: kappnav/apis
-    tag: 0.8.0
+    repository: mrglavas/kappnav-apis
+    tag: 0.9.0-beta
     
   ###############################################################################
   ## kAppNav Controller variables
   ###############################################################################
 
   appNavController:
-    repository: kappnav/controller
-    tag: 0.8.0
+    repository: mrglavas/kappnav-controller
+    tag: 0.9.0-beta
     
   ###############################################################################
   ## kAppNav UI variables
   ###############################################################################
 
   appNavUI:
-    repository: kappnav/ui
-    tag: 0.8.0
+    repository: mrglavas/kappnav-ui
+    tag: 0.9.0-beta
 
   ###############################################################################
   ## kAppNav Inventory variables
@@ -50,8 +50,8 @@ spec:
 
   extensionContainers: 
     appNavInv: 
-      repository: kappnav/inv
-      tag: 0.8.0
+      repository: mrglavas/kappnav-inv
+      tag: 0.9.0-beta
 
   ###############################################################################
   ## Environmental variables
